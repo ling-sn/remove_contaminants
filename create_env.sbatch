@@ -29,12 +29,4 @@
 
 module purge
 eval "$(conda shell.bash hook)"
-
-ENV_NAME = "rm-contam"
-
-if ! conda env list | grep -q "$ENV_NAME"; then
-    echo "Creating Conda environment: $ENV_NAME"
-    conda create -n rm-contam python=3.10 r-base=4.3.1 hisat2=2.2.1 samtools=1.17 Bioconductor-deseq2=1.40.2 subread=2.0.6 matplotlib=3.7.2 numpy=1.25.1 pandas=2.0.3 scipy=1.11.1 seaborn=0.12.2 scikit-learn=1.3.0 rpy2=3.5.11 bowtie2=2.5.1
-else
-    echo "Conda environment "$ENV_NAME" already exists. Skipping creation."
-fi
+conda create -n RNA-SEQ-2 python=3.10 r-base=4.3.1 hisat2=2.2.1 samtools=1.17 Bioconductor-deseq2=1.40.2 subread=2.0.6 matplotlib=3.7.2 numpy=1.25.1 pandas=2.0.3 scipy=1.11.1 seaborn=0.12.2 scikit-learn=1.3.0 rpy2=3.5.11 bowtie2=2.5.1
