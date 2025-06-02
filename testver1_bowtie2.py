@@ -3,6 +3,7 @@ import subprocess
 import shutil
 from pathlib import Path
 import traceback
+import argparse
 
 class Bowtie2Aligner:
     def __init__(self, folder_path):
@@ -70,7 +71,7 @@ class Bowtie2Aligner:
         for r1_file in subfolder.glob("*_R1_*"):
             base_name = r1_file.name.split("_R1_")[0] 
             r1_filename = r1_file
-            r2_filename = r1_file.replace("_R1_", "_R2_")
+            r2_filename = r1_file.with_name(r1_file.name.replace("_R1_", "_R2_"))
             
             self.grouped_files[base_name] = (r1_filename, r2_filename) ## define dictionary
 
@@ -129,4 +130,15 @@ def rmcontam_pipeline(folder_path, output_path):
                 except Exception as e:
                     print(f"Failed to align {file.name} with bowtie2: {e}")
                     traceback.print_exc()
-                   
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run contaminant removal pipeline.")
+    parser.add_argument("--input", required=True, help="Input processed_fastqs folder name")
+    parser.add_argument("--output", required=True, help="Desired output folder name for processed files")
+    parser.add_argument("-u", "--unzip", action="store_true", help="Dummy flag if needed")
+
+    args = parser.parse_args()
+
+    print("Starting contaminant removal pipeline...")
+    rmcontam_pipeline(args.input, args.output)
+    print("Pipeline finished.")
