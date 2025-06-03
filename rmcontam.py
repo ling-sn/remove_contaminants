@@ -11,13 +11,9 @@ class Bowtie2Aligner:
         self.bowtie2_index = self.parent_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
-
-        if None not in (file_stem, processed_folder, subfolder):
-            self.sam_output = processed_folder/subfolder/"samtools"/f"{file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
-            self.rmcontam_output = processed_folder/subfolder/f"{file_stem}_unmapped.fastq.gz"
-            self.contam_output = processed_folder/subfolder/f"{file_stem}_mapped.fastq.gz"
-        else:
-            self.sam_output = self.rmcontam_output = self.contam_output = None
+        self.sam_output = processed_folder/subfolder/"samtools"/f"{file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
+        self.rmcontam_output = processed_folder/subfolder/f"{file_stem}_unmapped.fastq.gz"
+        self.contam_output = processed_folder/subfolder/f"{file_stem}_mapped.fastq.gz"
 
     def build_bowtie2_index(self):
         """
@@ -135,9 +131,6 @@ def rmcontam_pipeline(folder_path, output_path):
     input_dir = Path(folder_path) ## used Path to improve readability of code below
     output_dir = Path(output_path)
 
-    temp_aligner = Bowtie2Aligner(input_dir, None, None, None)
-    temp_aligner.build_bowtie2_index() ## build bowtie2 index
-
     for subfolder in input_dir.iterdir(): ## amount of subfolders = number of replicates
         if subfolder.is_dir():
             processed_folder = output_dir/f"{subfolder.name}_bowtie2" ## processed folders for bowtie2 outputs
@@ -149,6 +142,9 @@ def rmcontam_pipeline(folder_path, output_path):
                     file_stem = file.name.split(".")[0]
                     aligner = Bowtie2Aligner(input_dir, file_stem, processed_folder, subfolder)
 
+                    ## build bowtie2 index; after 1st loop, pass
+                    aligner.build_bowtie2_index()
+
                     ## run bowtie2 alignment functions
                     if "_merged" in file.name or "_unpaired" in file.name:
                         aligner.single_reads(file)
@@ -156,6 +152,8 @@ def rmcontam_pipeline(folder_path, output_path):
                         aligner.paired_reads(file)
                     
                     ## run samtools function
+                    samtools_folder = output_dir/f"{subfolder.name}_bowtie2"/"samtools"
+                    samtools_folder.mkdir(exist_ok=True) 
                     aligner.convert_sam()
                     
                 except Exception as e:
@@ -173,4 +171,4 @@ if __name__ == "__main__":
 
     print("Starting contaminant removal pipeline...")
     rmcontam_pipeline(args.input, args.output)
-    print("Pipeline finished.")
+    print("Pipeline finished.")                
