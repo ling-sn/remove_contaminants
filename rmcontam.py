@@ -19,9 +19,10 @@ class Bowtie2Aligner:
         """
         if not self.bowtie2_index.exists():
             try:
-                cmd = ["bowtie2-build", "-p", "2", ## use 2 threads to speed up process 
-                       "-f", str(self.contaminants_dir), ## specifies that input is fasta
-                       str(self.bowtie2_index)]
+                cmd = ["bowtie2-build",
+                       str(self.contaminants_dir),
+                       str(self.bowtie2_index),
+                       "-p", "2"] ## use 2 threads to speed up process
                 result = subprocess.run(cmd, 
                                         check = True, ## if command returns non-zero exit status, raise error
                                         capture_output = True, 
