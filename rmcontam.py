@@ -105,7 +105,7 @@ class Bowtie2Aligner:
         """
         sam_output = samtools_folder/f"{file.stem}_mapped.sam"
         sam_filename = Path(sam_output).stem 
-        bam_file = f"{sam_filename}.bam"
+        bam_file = samtools_folder/f"{sam_filename}.bam"
         try:
             subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
                             "-o", str(bam_file), ## output file name
@@ -172,4 +172,4 @@ if __name__ == "__main__":
 
     print("Starting contaminant removal pipeline...")
     rmcontam_pipeline(args.input, args.output)
-    print("Pipeline finished.")                
+    print("Pipeline finished.")
