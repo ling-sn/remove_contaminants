@@ -11,7 +11,7 @@ class Bowtie2Aligner:
         self.bowtie2_index = self.parent_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
-        self.sam_output = samtools_folder/f"{file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
+        self.sam_output = samtools_folder/"samtools"/f"{file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
         self.rmcontam_output = processed_folder/subfolder/f"{file_stem}_unmapped.fastq.gz"
         self.contam_output = processed_folder/subfolder/f"{file_stem}_mapped.fastq.gz"
 
@@ -135,6 +135,8 @@ def rmcontam_pipeline(folder_path, output_path):
         if subfolder.is_dir():
             processed_folder = output_dir/f"{subfolder.name}_bowtie2" ## processed folders for bowtie2 outputs
             processed_folder.mkdir(exist_ok=True) ## if directory already exists, suppress OSError
+            samtools_folder = processed_folder/"samtools"
+            samtools_folder.mkdir(exist_ok=True) 
 
             for file in subfolder.glob("*.fastq.gz"): ## iterate through indiv. files in subfolder
                 try:
@@ -152,8 +154,6 @@ def rmcontam_pipeline(folder_path, output_path):
                         aligner.paired_reads(file)
                     
                     ## run samtools function
-                    samtools_folder = processed_folder/"samtools"
-                    samtools_folder.mkdir(exist_ok=True) 
                     aligner.convert_sam()
                     
                 except Exception as e:
@@ -171,4 +171,4 @@ if __name__ == "__main__":
 
     print("Starting contaminant removal pipeline...")
     rmcontam_pipeline(args.input, args.output)
-    print("Pipeline finished.")                
+    print("Pipeline finished.")
