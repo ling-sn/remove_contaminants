@@ -19,7 +19,7 @@ class Bowtie2Aligner:
         """
         if not self.bowtie2_index.exists():
             try:
-                cmd = ["bowtie2-build", "--threads 2", ## use 2 threads to speed up process 
+                cmd = ["bowtie2-build", "-p", "2", ## use 2 threads to speed up process 
                        "-f", str(self.contaminants_dir), ## specifies that input is fasta
                        str(self.bowtie2_index)]
                 result = subprocess.run(cmd, 
