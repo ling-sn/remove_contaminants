@@ -95,7 +95,7 @@ class Bowtie2Aligner:
             raise
         return result
     
-    def convert_sam():
+    def convert_sam(self):
         """
         Converts .sam output from bowtie2 into .bam, 
         then sorts and indexes into .bai
