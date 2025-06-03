@@ -11,9 +11,13 @@ class Bowtie2Aligner:
         self.bowtie2_index = self.parent_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
-        self.sam_output = processed_folder/subfolder/"samtools"/f"{file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
-        self.rmcontam_output = processed_folder/subfolder/f"{file_stem}_unmapped.fastq.gz"
-        self.contam_output = processed_folder/subfolder/f"{file_stem}_mapped.fastq.gz"
+
+        if None not in (file_stem, processed_folder, subfolder):
+            self.sam_output = processed_folder/subfolder/"samtools"/f"{file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
+            self.rmcontam_output = processed_folder/subfolder/f"{file_stem}_unmapped.fastq.gz"
+            self.contam_output = processed_folder/subfolder/f"{file_stem}_mapped.fastq.gz"
+        else:
+            self.sam_output = self.rmcontam_output = self.contam_output = None
 
     def build_bowtie2_index(self):
         """
