@@ -5,16 +5,15 @@ import traceback
 import argparse
 
 class Bowtie2Aligner:
-    def __init__(self, folder_path, file, processed_folder, subfolder):
+    def __init__(self, folder_path, file_stem, processed_folder, subfolder):
         self.parent_path = Path(folder_path).parent
         self.contaminants_dir = self.parent_path/"contaminants.fa"
         self.bowtie2_index = self.parent_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
-        self.file_stem = file.name.split(".")[0]
-        self.sam_output = processed_folder/subfolder/"samtools"/f"{self.file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
-        self.rmcontam_output = processed_folder/subfolder/f"{self.file_stem}_unmapped.fastq.gz"
-        self.contam_output = processed_folder/subfolder/f"{self.file_stem}_mapped.fastq.gz"
+        self.sam_output = processed_folder/subfolder/"samtools"/f"{file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
+        self.rmcontam_output = processed_folder/subfolder/f"{file_stem}_unmapped.fastq.gz"
+        self.contam_output = processed_folder/subfolder/f"{file_stem}_mapped.fastq.gz"
 
     def build_bowtie2_index(self):
         """
@@ -76,6 +75,7 @@ class Bowtie2Aligner:
         Align paired-end reads (unmerged)
         """
         try: 
+            self.detect_reps(file.parent)
             cmd = ["bowtie2",
                     "-x", str(self.bowtie2_index),
                     "-1", str(self.r1_filename),
@@ -142,13 +142,14 @@ def rmcontam_pipeline(folder_path, output_path):
             for file in subfolder.glob("*.fastq.gz"): ## iterate through indiv. files in subfolder
                 try:
                     ## initialize class
-                    aligner = Bowtie2Aligner(input_dir, file, processed_folder, subfolder)
+                    file_stem = file.name.split(".")[0]
+                    aligner = Bowtie2Aligner(input_dir, file_stem, processed_folder, subfolder)
 
                     ## run bowtie2 alignment functions
                     if "_merged" in file.name or "_unpaired" in file.name:
-                        aligner.single_reads(file, processed_folder)
+                        aligner.single_reads(file)
                     elif "_unmerged" in file.name:
-                        aligner.paired_reads(file, processed_folder)
+                        aligner.paired_reads(file)
                     
                     ## run samtools function
                     aligner.convert_sam()
