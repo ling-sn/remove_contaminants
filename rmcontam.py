@@ -21,8 +21,7 @@ class Bowtie2Aligner:
             try:
                 cmd = ["bowtie2-build",
                        str(self.contaminants_dir),
-                       str(self.bowtie2_index),
-                       "-p", "2"] ## use 2 threads to speed up process
+                       str(self.bowtie2_index)]
                 result = subprocess.run(cmd, 
                                         check = True, ## if command returns non-zero exit status, raise error
                                         capture_output = True, 
