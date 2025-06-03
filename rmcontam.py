@@ -36,14 +36,14 @@ class Bowtie2Aligner:
             pass
         return result
         
-    def single_reads(self, file, processed_folder, samtools_folder, subfolder):
+    def single_reads(self, file, processed_folder, samtools_folder):
         """
         Align single-end reads (merged/unpaired)
         """
         try:
             sam_output = samtools_folder/f"{file.stem}_mapped.sam" ## file.stem = filename w/o both extensions
-            rmcontam_output = processed_folder/subfolder/f"{file.stem}_unmapped.fastq.gz"
-            contam_output = processed_folder/subfolder/f"{file.stem}_mapped.fastq.gz"
+            rmcontam_output = processed_folder/f"{file.stem}_unmapped.fastq.gz"
+            contam_output = processed_folder/f"{file.stem}_mapped.fastq.gz"
             cmd = ["bowtie2", 
                     "-x", str(self.bowtie2_index), ## provides index that we created earlier
                     "-U", str(file), ## specifies single-read
@@ -70,14 +70,14 @@ class Bowtie2Aligner:
             self.r1_filename = r1_file
             self.r2_filename = r1_file.with_name(r1_file.name.replace("_R1_", "_R2_"))
 
-    def paired_reads(self, file, processed_folder, samtools_folder, subfolder):
+    def paired_reads(self, file, processed_folder, samtools_folder):
         """
         Align paired-end reads (unmerged)
         """
         try:
-            sam_output = samtools_folder/f"{file.stem}_mapped.sam"
-            rmcontam_output = processed_folder/subfolder/f"{file.stem}_unmapped.fastq.gz"
-            contam_output = processed_folder/subfolder/f"{file.stem}_mapped.fastq.gz" 
+            sam_output = samtools_folder/f"{file.stem}_mapped.sam" ## file.stem = filename w/o both extensions
+            rmcontam_output = processed_folder/f"{file.stem}_unmapped.fastq.gz"
+            contam_output = processed_folder/f"{file.stem}_mapped.fastq.gz"
             self.detect_reps(file.parent)
             cmd = ["bowtie2",
                     "-x", str(self.bowtie2_index),
@@ -144,15 +144,15 @@ def rmcontam_pipeline(folder_path, output_path):
             processed_folder = output_dir/f"{subfolder.name}_bowtie2" ## processed folders for bowtie2 outputs
             processed_folder.mkdir(exist_ok=True) ## if directory already exists, suppress OSError
             samtools_folder = processed_folder/"samtools"
-            samtools_folder.mkdir(exist_ok=True) 
+            samtools_folder.mkdir(exist_ok=True)
 
             for file in subfolder.glob("*.fastq.gz"): ## iterate through indiv. files in subfolder
                 try:
                     ## run bowtie2 alignment functions
                     if "_merged" in file.name or "_unpaired" in file.name:
-                        aligner.single_reads(file, processed_folder, samtools_folder, subfolder)
+                        aligner.single_reads(file, processed_folder, samtools_folder)
                     elif "_unmerged" in file.name:
-                        aligner.paired_reads(file, processed_folder, samtools_folder, subfolder)
+                        aligner.paired_reads(file, processed_folder, samtools_folder)
                     
                     ## run samtools function
                     aligner.convert_sam(samtools_folder, file)
@@ -172,4 +172,4 @@ if __name__ == "__main__":
 
     print("Starting contaminant removal pipeline...")
     rmcontam_pipeline(args.input, args.output)
-    print("Pipeline finished.")
+    print("Pipeline finished.")                
