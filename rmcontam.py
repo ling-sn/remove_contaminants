@@ -5,13 +5,13 @@ import traceback
 import argparse
 
 class Bowtie2Aligner:
-    def __init__(self, folder_path, file_stem, processed_folder, subfolder):
+    def __init__(self, folder_path, file_stem, processed_folder, subfolder, samtools_folder):
         self.parent_path = Path(folder_path).parent
         self.contaminants_dir = self.parent_path/"contaminants.fa"
         self.bowtie2_index = self.parent_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
-        self.sam_output = processed_folder/subfolder/"samtools"/f"{file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
+        self.sam_output = samtools_folder/f"{file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
         self.rmcontam_output = processed_folder/subfolder/f"{file_stem}_unmapped.fastq.gz"
         self.contam_output = processed_folder/subfolder/f"{file_stem}_mapped.fastq.gz"
 
@@ -140,7 +140,7 @@ def rmcontam_pipeline(folder_path, output_path):
                 try:
                     ## initialize class
                     file_stem = file.name.split(".")[0]
-                    aligner = Bowtie2Aligner(input_dir, file_stem, processed_folder, subfolder)
+                    aligner = Bowtie2Aligner(input_dir, file_stem, processed_folder, subfolder, samtools_folder)
 
                     ## build bowtie2 index; after 1st loop, pass
                     aligner.build_bowtie2_index()
@@ -152,7 +152,7 @@ def rmcontam_pipeline(folder_path, output_path):
                         aligner.paired_reads(file)
                     
                     ## run samtools function
-                    samtools_folder = output_dir/f"{subfolder.name}_bowtie2"/"samtools"
+                    samtools_folder = processed_folder/"samtools"
                     samtools_folder.mkdir(exist_ok=True) 
                     aligner.convert_sam()
                     
