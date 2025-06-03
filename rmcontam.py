@@ -5,15 +5,12 @@ import traceback
 import argparse
 
 class Bowtie2Aligner:
-    def __init__(self, folder_path, file_stem, processed_folder, subfolder, samtools_folder):
+    def __init__(self, folder_path):
         self.parent_path = Path(folder_path).parent
         self.contaminants_dir = self.parent_path/"contaminants.fa"
         self.bowtie2_index = self.parent_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
-        self.sam_output = samtools_folder/"samtools"/f"{file_stem}_mapped.sam" ## file_stem = filename w/o both extensions
-        self.rmcontam_output = processed_folder/subfolder/f"{file_stem}_unmapped.fastq.gz"
-        self.contam_output = processed_folder/subfolder/f"{file_stem}_mapped.fastq.gz"
 
     def build_bowtie2_index(self):
         """
@@ -39,17 +36,20 @@ class Bowtie2Aligner:
             pass
         return result
         
-    def single_reads(self, file):
+    def single_reads(self, file, processed_folder, samtools_folder, subfolder):
         """
         Align single-end reads (merged/unpaired)
         """
         try:
+            sam_output = samtools_folder/f"{file.stem}_mapped.sam" ## file.stem = filename w/o both extensions
+            rmcontam_output = processed_folder/subfolder/f"{file.stem}_unmapped.fastq.gz"
+            contam_output = processed_folder/subfolder/f"{file.stem}_mapped.fastq.gz"
             cmd = ["bowtie2", 
                     "-x", str(self.bowtie2_index), ## provides index that we created earlier
                     "-U", str(file), ## specifies single-read
-                    "-S", str(self.sam_output), ## .sam file of contam reads
-                    "--un-gz", str(self.rmcontam_output), ## merged/unpaired reads that failed to align (mrna)
-                    "--al-gz", str(self.contam_output)] ## merged/unpaired reads that aligned ≥1 times
+                    "-S", str(sam_output), ## .sam file of contam reads
+                    "--un-gz", str(rmcontam_output), ## merged/unpaired reads that failed to align (mrna)
+                    "--al-gz", str(contam_output)] ## merged/unpaired reads that aligned ≥1 times
             result = subprocess.run(cmd, 
                                     check = True, 
                                     capture_output = True, 
@@ -70,19 +70,22 @@ class Bowtie2Aligner:
             self.r1_filename = r1_file
             self.r2_filename = r1_file.with_name(r1_file.name.replace("_R1_", "_R2_"))
 
-    def paired_reads(self, file):
+    def paired_reads(self, file, processed_folder, samtools_folder, subfolder):
         """
         Align paired-end reads (unmerged)
         """
-        try: 
+        try:
+            sam_output = samtools_folder/f"{file.stem}_mapped.sam"
+            rmcontam_output = processed_folder/subfolder/f"{file.stem}_unmapped.fastq.gz"
+            contam_output = processed_folder/subfolder/f"{file.stem}_mapped.fastq.gz" 
             self.detect_reps(file.parent)
             cmd = ["bowtie2",
                     "-x", str(self.bowtie2_index),
                     "-1", str(self.r1_filename),
                     "-2", str(self.r2_filename),
-                    "-S", str(self.sam_output), ## .sam file of contam reads
-                    "--un-conc-gz", str(self.rmcontam_output), ## unmerged reads that failed to align (mrna)
-                    "--al-conc-gz", str(self.contam_output)] ## unmerged reads that aligned ≥1 times
+                    "-S", str(sam_output), ## .sam file of contam reads
+                    "--un-conc-gz", str(rmcontam_output), ## unmerged reads that failed to align (mrna)
+                    "--al-conc-gz", str(contam_output)] ## unmerged reads that aligned ≥1 times
             result = subprocess.run(cmd, 
                                     check = True, 
                                     capture_output = True, 
@@ -95,17 +98,18 @@ class Bowtie2Aligner:
             raise
         return result
     
-    def convert_sam(self):
+    def convert_sam(self, samtools_folder, file):
         """
         Converts .sam output from bowtie2 into .bam, 
         then sorts and indexes into .bai
         """
-        sam_filename = Path(self.sam_output).stem 
+        sam_output = samtools_folder/f"{file.stem}_mapped.sam"
+        sam_filename = Path(sam_output).stem 
         bam_file = f"{sam_filename}.bam"
         try:
             subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
                             "-o", str(bam_file), ## output file name
-                            str(self.sam_output)], ## input file name
+                            str(sam_output)], ## input file name
                             check = True,
                             capture_output = True,
                             text = True)
@@ -113,7 +117,7 @@ class Bowtie2Aligner:
                             check = True,
                             capture_output = True,
                             text = True)
-            subprocess.run(["rm", str(self.sam_output)], ## remove original .sam file
+            subprocess.run(["rm", str(sam_output)], ## remove original .sam file
                             check = True, ## ensures that this block only runs if previous 2 were successful
                             capture_output = True,
                             text = True)
@@ -130,6 +134,10 @@ def rmcontam_pipeline(folder_path, output_path):
 
     input_dir = Path(folder_path) ## used Path to improve readability of code below
     output_dir = Path(output_path)
+    
+    ## initialize class
+    aligner = Bowtie2Aligner(input_dir)
+    aligner.build_bowtie2_index()
 
     for subfolder in input_dir.iterdir(): ## amount of subfolders = number of replicates
         if subfolder.is_dir():
@@ -140,21 +148,14 @@ def rmcontam_pipeline(folder_path, output_path):
 
             for file in subfolder.glob("*.fastq.gz"): ## iterate through indiv. files in subfolder
                 try:
-                    ## initialize class
-                    file_stem = file.name.split(".")[0]
-                    aligner = Bowtie2Aligner(input_dir, file_stem, processed_folder, subfolder, samtools_folder)
-
-                    ## build bowtie2 index; after 1st loop, pass
-                    aligner.build_bowtie2_index()
-
                     ## run bowtie2 alignment functions
                     if "_merged" in file.name or "_unpaired" in file.name:
-                        aligner.single_reads(file)
+                        aligner.single_reads(file, processed_folder, samtools_folder, subfolder)
                     elif "_unmerged" in file.name:
-                        aligner.paired_reads(file)
+                        aligner.paired_reads(file, processed_folder, samtools_folder, subfolder)
                     
                     ## run samtools function
-                    aligner.convert_sam()
+                    aligner.convert_sam(samtools_folder, file)
                     
                 except Exception as e:
                     print(f"Failed to align {file.name} with bowtie2 and produce .bam files: {e}")
