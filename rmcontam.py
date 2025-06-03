@@ -21,7 +21,8 @@ class Bowtie2Aligner:
             try:
                 cmd = ["bowtie2-build",
                        str(self.contaminants_dir),
-                       str(self.bowtie2_index)]
+                       str(self.bowtie2_index),
+                       "--threads", "4"]
                 result = subprocess.run(cmd, 
                                         check = True, ## if command returns non-zero exit status, raise error
                                         capture_output = True, 
