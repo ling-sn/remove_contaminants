@@ -4,8 +4,9 @@ import traceback
 
 def build_bowtie2_index():
     """
-    Builds bowtie2 index once;
-    call this after create_env.sbatch & before rm_contam.sbatch
+    Builds bowtie2 index once.
+        1. Requires contaminants FASTA in current working directory
+        2. Call after create_env.sbatch & before rm_contam.sbatch
     """
     current_path = Path.cwd()
     contaminants_dir = current_path/"contaminants.fa"
