@@ -6,7 +6,7 @@ def build_bowtie2_index():
     """
     Builds bowtie2 index once.
         1. Requires contaminants.fa in current working directory
-        3. Call bt2index.sbatch after activating RNA-SEQ-2 conda environment
+        3. Call build_index.sbatch after activating RNA-SEQ-2 conda environment
         3. Use before rm_contam.sbatch
     """
     current_path = Path.cwd()
