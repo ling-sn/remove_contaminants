@@ -3,7 +3,6 @@ import subprocess
 from pathlib import Path
 import traceback
 import argparse
-import fcntl
 
 class Bowtie2Aligner:
     def __init__(self, folder_path):
@@ -12,45 +11,6 @@ class Bowtie2Aligner:
         self.bowtie2_index = self.parent_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
-        self.lock_file = self.parent_path/"index_build.lock"
-
-    def build_bowtie2_index(self):
-        """
-        Must have contaminants.fa in parent directory of folder_path.
-            folder_path = Folder name that ends with 'processed_fastqs'
-        """
-        suffixes = [".1.bt2", ".2.bt2", ".3.bt2", ".4.bt2",
-                    ".rev.1.bt2", ".rev.2.bt2"]
-        
-        with open(self.lock_file, "w") as lock: ## acquires exclusive lock to prevent simultaneous access
-            fcntl.flock(lock, fcntl.LOCK_EX)
-
-            try:
-                index_complete = all(Path(f"{self.bowtie2_index}{i}").exists()
-                                     and Path(f"{self.bowtie2_index}{i}").stat().st_size > 0
-                                     for i in suffixes)
-                if not index_complete: ## checks if list is empty; if so, proceed
-                    cmd = ["bowtie2-build",
-                            str(self.contaminants_dir),
-                            str(self.bowtie2_index)]
-                    result = subprocess.run(cmd, 
-                                            check = True, ## if command returns non-zero exit status, raise error
-                                            capture_output = True, 
-                                            text = True)
-                    return result
-            except subprocess.CalledProcessError as e: ## error handling
-                print(f"Failed to build bowtie2 index: {e}")
-                print("STDERR:", e.stderr)
-                print("STDOUT:", e.stdout)
-                traceback.print_exc()
-                for i in self.parent_path.glob("*.bt2"):
-                    i.unlink()
-                raise
-            
-            finally: 
-                fcntl.flock(lock, fcntl.LOCK_UN) ## release lock
-                if self.lock_file.exists():
-                    self.lock_file.unlink()
         
     def single_reads(self, file, processed_folder, samtools_folder):
         """
@@ -150,10 +110,9 @@ def rmcontam_pipeline(folder_path, output_path):
 
     input_dir = Path(folder_path) ## used Path to improve readability of code below
     output_dir = Path(output_path)
-    
+
     ## initialize class
     aligner = Bowtie2Aligner(input_dir)
-    aligner.build_bowtie2_index()
 
     for subfolder in input_dir.iterdir(): ## amount of subfolders = number of replicates
         if subfolder.is_dir():
