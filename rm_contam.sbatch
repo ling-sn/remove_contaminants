@@ -3,7 +3,7 @@
 #SBATCH --mail-user=lingsn@umich.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --output=rm_contam_%u_%A_%a.out
-#SBATCH --array=0-11
+#SBATCH --array=0-11%4
 #SBATCH --account=cweidman0
 #SBATCH --time=4:00:00
 #SBATCH --mem=16000m
