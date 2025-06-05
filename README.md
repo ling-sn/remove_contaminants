@@ -1,4 +1,4 @@
-# **Extracting contaminant human RNAs from processed fastp files**
+# **Removing contaminant human RNAs from processed fastp files**
 ## Instructions
 1. Run `create_env.sbatch` to create the RNA-SEQ-2 conda environment
 3. Activate conda environment via `conda activate RNA-SEQ-2`
