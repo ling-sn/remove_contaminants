@@ -43,7 +43,8 @@ class Bowtie2Aligner:
             
             finally: 
                 fcntl.flock(lock, fcntl.LOCK_UN) ## release lock
-                os.unlink(self.lock_file) ## remove lock file
+                if self.lock_file.exists():
+                    self.lock_file.unlink()
         
     def single_reads(self, file, processed_folder, samtools_folder):
         """
