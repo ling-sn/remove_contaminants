@@ -4,6 +4,7 @@ from pathlib import Path
 import traceback
 import argparse
 import glob
+import fcntl
 
 class Bowtie2Aligner:
     def __init__(self, folder_path):
@@ -12,31 +13,37 @@ class Bowtie2Aligner:
         self.bowtie2_index = self.parent_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
+        self.lock_file = self.parent_path/"index_build.lock"
 
     def build_bowtie2_index(self):
         """
         Must have contaminants.fa in parent directory of folder_path.
             folder_path = Folder name that ends with 'processed_fastqs'
         """
-        bt2_files = glob.glob(os.path.join(self.parent_path, "*.bt2")) ## produces list of files
-        if not bt2_files: ## checks if list is empty; if so, proceed
+        with open(self.lock_file, "w") as lock: ## acquires exclusive lock to prevent simultaneous access
+            fcntl.flock(lock, fcntl.LOCK_EX)
+
             try:
-                cmd = ["bowtie2-build",
-                       str(self.contaminants_dir),
-                       str(self.bowtie2_index)]
-                result = subprocess.run(cmd, 
-                                        check = True, ## if command returns non-zero exit status, raise error
-                                        capture_output = True, 
-                                        text = True)
+               bt2_files = glob.glob(os.path.join(self.parent_path, "*.bt2")) ## produces list of files
+               if not bt2_files: ## checks if list is empty; if so, proceed
+                    cmd = ["bowtie2-build",
+                            str(self.contaminants_dir),
+                            str(self.bowtie2_index)]
+                    result = subprocess.run(cmd, 
+                                            check = True, ## if command returns non-zero exit status, raise error
+                                            capture_output = True, 
+                                            text = True)
+                    return result
             except subprocess.CalledProcessError as e: ## error handling
                 print(f"Failed to build bowtie2 index: {e}")
                 print("STDERR:", e.stderr)
                 print("STDOUT:", e.stdout)
                 traceback.print_exc()
                 raise
-        else:
-            pass
-        return result
+            
+            finally: 
+                fcntl.flock(lock, fcntl.LOCK_UN) ## release lock
+                os.unlink(self.lock_file) ## remove lock file
         
     def single_reads(self, file, processed_folder, samtools_folder):
         """
