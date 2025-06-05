@@ -10,7 +10,7 @@
 ## When do I use this pipeline?
 This is applied after running the fastp script on your raw data (fastq files). 
 ## Additional information about contaminants FASTA
-* Contains human rRNA, tRNA, snoRNA, and snRNA sequences sourced from the anRNAlab genomic database and various online databases
+* Contains human rRNA, tRNA, snoRNA, and snRNA sequences sourced from the anRNAlab genomic database as well as various online databases
   * rRNA online database: [GitHub](https://github.com/fallerlab/ARF/blob/main/rRNAs/4V6X_human_rRNAs.fa)
   * tRNA online database: [GtRNAdb](https://gtrnadb.ucsc.edu/genomes/eukaryota/Hsapi38/Hsapi38-seq.html)
   * snoRNA online database: [snoRNABase](https://www-snorna.biotoul.fr/browse.php)
