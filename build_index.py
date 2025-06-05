@@ -2,17 +2,15 @@ import subprocess
 from pathlib import Path
 import traceback
 
-def build_bowtie2_index(folder_path):
+def build_bowtie2_index():
     """
-    For this script, you only need to list one (1) folder_path
-    because all folders use the same bowtie2 index
-    
-    folder_path = Folder name that ends with 'processed_fastqs'
+    Builds bowtie2 index once;
+    call this after create_env.sbatch & before rm_contam.sbatch
     """
-    parent_path = Path(folder_path).parent
-    contaminants_dir = parent_path/"contaminants.fa"
-    bowtie2_index = parent_path/"contaminants_index"
-    bt2_files = list(parent_path.glob("*.bt2")) ## produces list of files
+    current_path = Path.cwd()
+    contaminants_dir = current_path/"contaminants.fa"
+    bowtie2_index = current_path/"contaminants_index"
+    bt2_files = list(current_path.glob("*.bt2")) ## produces list of files
     
     if not bt2_files: ## checks if list is empty; if so, proceed
         try:
