@@ -5,10 +5,10 @@ import traceback
 import argparse
 
 class Bowtie2Aligner:
-    def __init__(self, folder_path):
-        self.parent_path = Path(folder_path).parent
-        self.contaminants_dir = self.parent_path/"contaminants.fa"
-        self.bowtie2_index = self.parent_path/"contaminants_index"
+    def __init__(self):
+        self.current_path = Path.cwd()
+        self.contaminants_dir = self.current_path/"contaminants.fa"
+        self.bowtie2_index = self.current_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
         
