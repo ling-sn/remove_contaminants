@@ -5,8 +5,8 @@
 4. Run `build_index.sbatch` one time to build bowtie2 index for contaminants
 5. Run `rm_contam.sbatch` to separate out contaminant RNAs from each fastq file
 ## Tools used in contaminant removal script
-* _bowtie2_ is used to align single-end reads (merged/unpaired) and paired reads (unmerged) according to contaminants index
-* _samtools_ is used to convert .sam outputs from bowtie2 into .bam and .bai files
+* **bowtie2** is used to align single-end reads (merged/unpaired) and paired reads (unmerged) according to the contaminants index
+* **samtools** is used to convert the .sam outputs from bowtie2 into compressed .bam and .bai files
 ## When do I use this pipeline?
 This is applied after running the fastp script on your raw data (fastq files). 
 ## Additional information about contaminants FASTA
