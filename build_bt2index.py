@@ -30,5 +30,3 @@ def build_bowtie2_index(folder_path):
             print("STDOUT:", e.stdout)
             traceback.print_exc()
             raise
-
-build_bowtie2_index()
