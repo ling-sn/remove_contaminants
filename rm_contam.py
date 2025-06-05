@@ -112,7 +112,7 @@ def rmcontam_pipeline(folder_path, output_path):
     output_dir = Path(output_path)
 
     ## initialize class
-    aligner = Bowtie2Aligner(input_dir)
+    aligner = Bowtie2Aligner()
 
     for subfolder in input_dir.iterdir(): ## amount of subfolders = number of replicates
         if subfolder.is_dir():
