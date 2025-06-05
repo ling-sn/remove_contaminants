@@ -3,7 +3,6 @@ import subprocess
 from pathlib import Path
 import traceback
 import argparse
-import glob
 import fcntl
 
 class Bowtie2Aligner:
@@ -24,7 +23,7 @@ class Bowtie2Aligner:
             fcntl.flock(lock, fcntl.LOCK_EX)
 
             try:
-               bt2_files = glob.glob(os.path.join(self.parent_path, "*.bt2")) ## produces list of files
+               bt2_files = list(self.parent_path.glob("*.bt2")) ## produces list of files
                if not bt2_files: ## checks if list is empty; if so, proceed
                     cmd = ["bowtie2-build",
                             str(self.contaminants_dir),
@@ -43,8 +42,12 @@ class Bowtie2Aligner:
             
             finally: 
                 fcntl.flock(lock, fcntl.LOCK_UN) ## release lock
-                if self.lock_file.exists():
-                    self.lock_file.unlink()
+        
+        try:
+            if self.lock_file.exists(): ## delete lock file
+                self.lock_file.unlink()
+        except Exception as e:
+            print(f"Failed to remove lock file: {e}")
         
     def single_reads(self, file, processed_folder, samtools_folder):
         """
