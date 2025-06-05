@@ -1,9 +1,9 @@
 # **Extracting contaminant human RNAs from processed fastp files**
 ## Instructions
-1. Run create_env.sbatch to create the RNA-SEQ-2 conda environment
+1. Run `create_env.sbatch` to create the RNA-SEQ-2 conda environment
 3. Activate conda environment via `conda activate RNA-SEQ-2`
-4. Run build_index.sbatch one time to build bowtie2 index for contaminants
-5. Run rm_contam.sbatch to separate out contaminant RNAs from each fastq file
+4. Run `build_index.sbatch` one time to build bowtie2 index for contaminants
+5. Run `rm_contam.sbatch` to separate out contaminant RNAs from each fastq file
 ## Tools used in contaminant removal script
 * bowtie2 is used to align single-end reads (merged/unpaired) and paired reads (unmerged) according to the index
 * samtools is used to convert .sam outputs from bowtie2 into .bam and .bai files
