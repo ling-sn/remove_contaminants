@@ -19,12 +19,17 @@ class Bowtie2Aligner:
         Must have contaminants.fa in parent directory of folder_path.
             folder_path = Folder name that ends with 'processed_fastqs'
         """
+        suffixes = [".1.bt2", ".2.bt2", ".3.bt2", ".4.bt2",
+                    ".rev.1.bt2", ".rev.2.bt2"]
+        
         with open(self.lock_file, "w") as lock: ## acquires exclusive lock to prevent simultaneous access
             fcntl.flock(lock, fcntl.LOCK_EX)
 
             try:
-               bt2_files = list(self.parent_path.glob("*.bt2")) ## produces list of files
-               if not bt2_files: ## checks if list is empty; if so, proceed
+                index_complete = all(Path(f"{self.bowtie2_index}{i}").exists()
+                                     and Path(f"{self.bowtie2_index}{i}").stat().st_size > 0
+                                     for i in suffixes)
+                if not index_complete: ## checks if list is empty; if so, proceed
                     cmd = ["bowtie2-build",
                             str(self.contaminants_dir),
                             str(self.bowtie2_index)]
@@ -38,16 +43,14 @@ class Bowtie2Aligner:
                 print("STDERR:", e.stderr)
                 print("STDOUT:", e.stdout)
                 traceback.print_exc()
+                for i in self.parent_path.glob("*.bt2"):
+                    i.unlink()
                 raise
             
             finally: 
                 fcntl.flock(lock, fcntl.LOCK_UN) ## release lock
-        
-        try:
-            if self.lock_file.exists(): ## delete lock file
-                self.lock_file.unlink()
-        except Exception as e:
-            print(f"Failed to remove lock file: {e}")
+                if self.lock_file.exists():
+                    self.lock_file.unlink()
         
     def single_reads(self, file, processed_folder, samtools_folder):
         """
