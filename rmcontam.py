@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 import traceback
 import argparse
+import glob
 
 class Bowtie2Aligner:
     def __init__(self, folder_path):
@@ -17,22 +18,22 @@ class Bowtie2Aligner:
         Must have contaminants.fa in parent directory of folder_path.
             folder_path = Folder name that ends with 'processed_fastqs'
         """
-        if not self.bowtie2_index.exists():
+        bt2_files = glob.glob(os.path.join(self.parent_path, "*.bt2")) ## produces list of files
+        if not bt2_files: ## checks if list is empty; if so, proceed
             try:
                 cmd = ["bowtie2-build",
                        str(self.contaminants_dir),
-                       str(self.bowtie2_index),
-                       "--threads", "4"]
+                       str(self.bowtie2_index)]
                 result = subprocess.run(cmd, 
                                         check = True, ## if command returns non-zero exit status, raise error
                                         capture_output = True, 
                                         text = True)
             except subprocess.CalledProcessError as e: ## error handling
-                    print(f"Failed to build bowtie2 index: {e}")
-                    print("STDERR:", e.stderr)
-                    print("STDOUT:", e.stdout)
-                    traceback.print_exc()
-                    raise
+                print(f"Failed to build bowtie2 index: {e}")
+                print("STDERR:", e.stderr)
+                print("STDOUT:", e.stdout)
+                traceback.print_exc()
+                raise
         else:
             pass
         return result
@@ -173,4 +174,4 @@ if __name__ == "__main__":
 
     print("Starting contaminant removal pipeline...")
     rmcontam_pipeline(args.input, args.output)
-    print("Pipeline finished.")
+    print("Pipeline finished.")                
