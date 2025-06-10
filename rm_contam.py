@@ -101,7 +101,7 @@ class Bowtie2Aligner:
                             check = True,
                             capture_output = True,
                             text = True)
-            subprocess.run(["rm", str(merged_sam)], ## remove original .sam file
+            subprocess.run(["rm", *map(str, sam_list)], ## remove original .sam file
                             check = True, ## ensures that this block only runs if previous 2 were successful
                             capture_output = True,
                             text = True)
