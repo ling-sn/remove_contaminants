@@ -15,6 +15,7 @@ This is applied after running the fastp script on your raw data (fastq files).
   * tRNA online source: [GtRNAdb](https://gtrnadb.ucsc.edu/genomes/eukaryota/Hsapi38/Hsapi38-seq.html)
   * snoRNA online source: [snoRNABase](https://www-snorna.biotoul.fr/browse.php)
 ## Using the test data
+This allows you to test the script on example data.
 1. Navigate to "test" folder
 2. Run `mv 7KO-Cyto-BS_processed_fastqs ../` and navigate back to parent folder
 3. Follow instructions (Steps 1-3) above
