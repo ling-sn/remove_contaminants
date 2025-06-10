@@ -34,6 +34,6 @@ eval "$(conda shell.bash hook)"
 conda activate ~/miniconda3/envs/RNA-SEQ-2
 
 declare -a tasks=(
-"python3 rmcontam.py -u --input 7KO-Cyto-BS_processed_fastqs --output 7KO-Cyto-BS_filtered_processed_fastqs"
+"python3 rm_contam.py -u --input 7KO-Cyto-BS_processed_fastqs --output 7KO-Cyto-BS_filtered_processed_fastqs"
 )
 eval ${tasks[$SLURM_ARRAY_TASK_ID]}
