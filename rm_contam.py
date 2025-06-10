@@ -80,7 +80,7 @@ class Bowtie2Aligner:
         then sorts and indexes into .bai
         """
         base_name = file.stem.split("_")[0]
-        sam_list = list(Path().glob("*.sam"))
+        sam_list = list(samtools_folder.glob("*.sam"))
         merged_sam = samtools_folder/f"{base_name}_mapped.sam"
         sam_filename = Path(merged_sam).stem 
         bam_file = samtools_folder/f"{sam_filename}.bam"
