@@ -80,13 +80,17 @@ class Bowtie2Aligner:
         then sorts and indexes into .bai
         """
         base_name = file.stem.split("_")[0]
+        sam_list = list(Path().glob("*.sam"))
         merged_sam = samtools_folder/f"{base_name}_mapped.sam"
         sam_filename = Path(merged_sam).stem 
         bam_file = samtools_folder/f"{sam_filename}.bam"
 
         try:
-            subprocess.run("samtools", "merge", ## merge all .sam files into one
-                           str(merged_sam), "*.sam")
+            subprocess.run(["samtools", "merge", ## merge all .sam files into one
+                            str(merged_sam), *map(str, sam_list)], ## asterisk = expand list & iterate through
+                            check = True, 
+                            capture_output = True,
+                            text = True)
             subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
                             "-o", str(bam_file), ## output file name
                             str(merged_sam)], ## input file name
