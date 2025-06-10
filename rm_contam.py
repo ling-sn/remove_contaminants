@@ -79,13 +79,17 @@ class Bowtie2Aligner:
         Converts .sam output from bowtie2 into .bam, 
         then sorts and indexes into .bai
         """
-        sam_output = samtools_folder/f"{file.stem}_mapped.sam"
-        sam_filename = Path(sam_output).stem 
+        base_name = file.stem.split("_")[0]
+        merged_sam = samtools_folder/f"{base_name}_mapped.sam"
+        sam_filename = Path(merged_sam).stem 
         bam_file = samtools_folder/f"{sam_filename}.bam"
+
         try:
+            subprocess.run("samtools", "merge", ## merge all .sam files into one
+                           str(merged_sam), "*.sam")
             subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
                             "-o", str(bam_file), ## output file name
-                            str(sam_output)], ## input file name
+                            str(merged_sam)], ## input file name
                             check = True,
                             capture_output = True,
                             text = True)
@@ -93,7 +97,7 @@ class Bowtie2Aligner:
                             check = True,
                             capture_output = True,
                             text = True)
-            subprocess.run(["rm", str(sam_output)], ## remove original .sam file
+            subprocess.run(["rm", str(merged_sam)], ## remove original .sam file
                             check = True, ## ensures that this block only runs if previous 2 were successful
                             capture_output = True,
                             text = True)
