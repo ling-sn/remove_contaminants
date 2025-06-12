@@ -1,0 +1,3 @@
+test/** linguist-detectable=false
+*.fa linguist-detectable=false
+*.sbatch linguist-detectable=false
