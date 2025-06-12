@@ -160,7 +160,7 @@ def rmcontam_pipeline(folder_path, output_path):
                     traceback.print_exc()
                     continue
             
-            ## merge bam files & convert to bai
+            ## merge bam files, convert to bai, & remove files
             aligner.merge_bam(samtools_folder, file)
 
 if __name__ == "__main__":
