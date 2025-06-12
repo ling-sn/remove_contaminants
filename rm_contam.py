@@ -79,29 +79,36 @@ class Bowtie2Aligner:
         Converts .sam output from bowtie2 into .bam, 
         then sorts and indexes into .bai
         """
-        base_name = file.stem.split("_")[0]
-        sam_list = list(samtools_folder.glob("*.sam"))
-        merged_sam = samtools_folder/f"{base_name}_mapped.sam"
-        sam_filename = Path(merged_sam).stem 
+        ## vars for 1st subprocess (converting sam -> bam files)
+        sam_input = samtools_folder/f"{file.stem}_mapped.sam" # unique names are needed so files aren't overwritten
+        sam_filename = Path(sam_input).stem
         bam_file = samtools_folder/f"{sam_filename}.bam"
 
+        ## vars for 2nd subprocess (merging all bam)
+        base_name = file.stem.split("_")[0] # rm unique filenames
+        merged_bam = samtools_folder/f"{base_name}_mapped.bam"
+        bam_list = list(samtools_folder.glob("*.bam"))
+
+        ## vars for 4th subprocess (rm sam files)
+        sam_list = list(samtools_folder.glob("*.sam"))
+
         try:
-            subprocess.run(["samtools", "merge", ## merge all .sam files into one
-                            str(merged_sam), *map(str, sam_list)], ## asterisk = expand list & iterate through
+            subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
+                            "-o", str(bam_file), ## output file name
+                            str(sam_input)], ## input file name
+                            check = True,
+                            capture_output = True,
+                            text = True)
+            subprocess.run(["samtools", "merge", ## merge all .bam files into one
+                            str(merged_bam), *map(str, bam_list)], ## asterisk = expand list & iterate through
                             check = True, 
                             capture_output = True,
                             text = True)
-            subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
-                            "-o", str(bam_file), ## output file name
-                            str(merged_sam)], ## input file name
+            subprocess.run(["samtools", "index", str(merged_bam)], ## create .bai from .bam
                             check = True,
                             capture_output = True,
                             text = True)
-            subprocess.run(["samtools", "index", str(bam_file)], ## create .bai from .bam
-                            check = True,
-                            capture_output = True,
-                            text = True)
-            subprocess.run(["rm", *map(str, sam_list), str(merged_sam)], ## remove original .sam files
+            subprocess.run(["rm", *map(str, sam_list)], ## remove original .sam files
                             check = True, ## ensures that this block only runs if previous 2 were successful
                             capture_output = True,
                             text = True)
