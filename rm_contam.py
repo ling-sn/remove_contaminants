@@ -76,29 +76,37 @@ class Bowtie2Aligner:
     
     def convert_sam(self, samtools_folder, file):
         """
-        Converts .sam output from bowtie2 into .bam, 
-        then sorts and indexes into .bai
+        Converts .sam output from bowtie2 into .bam
         """
-        ## vars for 1st subprocess (converting sam -> bam files)
-        sam_input = samtools_folder/f"{file.stem}_mapped.sam" # unique names are needed so files aren't overwritten
+        sam_input = samtools_folder/f"{file.stem}_mapped.sam"
         sam_filename = Path(sam_input).stem
-        bam_file = samtools_folder/f"{sam_filename}.bam"
-
-        ## vars for 2nd subprocess (merging all bam)
-        base_name = file.stem.split("_")[0] # rm unique filenames
-        merged_bam = samtools_folder/f"{base_name}_mapped.bam"
-        bam_list = list(samtools_folder.glob("*.bam"))
-
-        ## vars for 4th subprocess (rm sam files)
-        sam_list = list(samtools_folder.glob("*.sam"))
+        bam_output = samtools_folder/f"{sam_filename}.bam"
 
         try:
             subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
-                            "-o", str(bam_file), ## output file name
+                            "-o", str(bam_output), ## output file name
                             str(sam_input)], ## input file name
                             check = True,
                             capture_output = True,
                             text = True)
+        except subprocess.CalledProcessError as e: ## error handling
+            print(f"Failed to convert {sam_input.name} to .bam: {e}")
+            print("STDERR:", e.stderr)
+            print("STDOUT:", e.stdout)
+            traceback.print_exc()
+            raise
+
+    def merge_bam(self, samtools_folder, file):
+        """
+        Merges all .bam files, then 
+        sorts and indexes into .bai
+        """
+        base_name = file.stem.split("_")[0] # create general filestem
+        merged_bam = samtools_folder/f"{base_name}_mapped.bam" # merged output
+        bam_list = list(samtools_folder.glob("*.bam"))
+        sam_list = list(samtools_folder.glob("*.sam"))
+
+        try:
             subprocess.run(["samtools", "merge", ## merge all .bam files into one
                             str(merged_bam), *map(str, bam_list)], ## asterisk = expand list & iterate through
                             check = True, 
@@ -113,7 +121,7 @@ class Bowtie2Aligner:
                             capture_output = True,
                             text = True)
         except subprocess.CalledProcessError as e: ## error handling
-            print(f"Failed to convert {sam_filename.name} to .bam and .bai: {e}")
+            print(f"Failed to create {merged_bam.name} and convert to .bai: {e}")
             print("STDERR:", e.stderr)
             print("STDOUT:", e.stdout)
             traceback.print_exc()
@@ -150,6 +158,7 @@ def rmcontam_pipeline(folder_path, output_path):
             
             ## run samtools function
             aligner.convert_sam(samtools_folder, file)
+            aligner.merge_bam(samtools_folder, file)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Run contaminant removal pipeline.")
