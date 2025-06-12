@@ -22,5 +22,5 @@ This allows you to test the script on example data.
    * If running code in local Linux environment (_i.e._, WSL), copy/paste code from .sbatch files instead of directly running them
 4. Run `python3 rm_contam.py -u --input 7KO-Cyto-BS_processed_fastqs --output 7KO-Cyto-BS_filtered_processed_fastqs`
 ## Using contaminants_index
-You can skip the bowtie2 index creation step by directly using the files in `contaminant_index`.
+You can skip the bowtie2 index creation step by directly using the files in `contaminants_index`.
 * Before running your analysis, navigate into the folder and move all `*.bt2` files into the parent directory. 
