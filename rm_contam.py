@@ -207,6 +207,7 @@ def rmcontam_pipeline(folder_path, output_path):
                     continue
             
             ## merge bam files, convert to bai, & remove files
+            samtools.sanitize_header()
             samtools.merge_bam(samtools_folder, subfolder)
 
 if __name__ == "__main__":
