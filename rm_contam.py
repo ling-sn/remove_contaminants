@@ -80,7 +80,7 @@ class Bowtie2Aligner:
         """
         sam_input = samtools_folder/f"{file.stem}_mapped.sam"
         sam_filename = Path(sam_input).stem
-        bam_output = samtools_folder/f"{sam_filename}.bam"
+        bam_output = samtools_folder/f"{sam_filename}_out.bam"
 
         try:
             subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
@@ -103,8 +103,8 @@ class Bowtie2Aligner:
         """
         base_name = file.stem.split("_")[0] # create general filestem
         merged_bam = samtools_folder/f"{base_name}_mapped.bam" # merged output
-        bam_list = list(samtools_folder.glob("*.bam"))
-        sam_list = list(samtools_folder.glob("*.sam"))
+        bam_list = list(samtools_folder.glob("*.bam")) # detect .bam files
+        rm_list = list(samtools_folder).glob("*out.bam") + list(samtools_folder.glob("*.sam"))
 
         try:
             subprocess.run(["samtools", "merge", ## merge all .bam files into one
@@ -116,7 +116,7 @@ class Bowtie2Aligner:
                             check = True,
                             capture_output = True,
                             text = True)
-            subprocess.run(["rm", *map(str, sam_list)], ## remove original .sam files
+            subprocess.run(["rm", *map(str, rm_list)], ## remove original .sam files
                             check = True, ## ensures that this block only runs if previous 2 were successful
                             capture_output = True,
                             text = True)
@@ -154,13 +154,14 @@ def rmcontam_pipeline(folder_path, output_path):
 
                     ## run samtools function
                     aligner.convert_sam(samtools_folder, file)
+                    
                 except Exception as e:
                     print(f"Failed to align {file.name} with bowtie2 and produce .bam files: {e}")
                     traceback.print_exc()
                     continue
             
             ## merge bam files & convert to bai
-            aligner.merge_bam(samtools_folder, file)
+            aligner.create_bai(samtools_folder, file)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Run contaminant removal pipeline.")
