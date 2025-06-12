@@ -155,7 +155,7 @@ class SamtoolsConversion:
                             check = True, 
                             capture_output = True,
                             text = True)
-            self.sanitize_header(samtools_folder)
+            self.sanitize_header()
             subprocess.run(["samtools", "index", str(self.merged_bam)], ## create .bai from .bam
                             check = True,
                             capture_output = True,
