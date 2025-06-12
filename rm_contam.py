@@ -113,15 +113,42 @@ class SamtoolsConversion:
                                 text = True).stdout
         invalid_regex = re.compile(r'@SQ.*SN:[^A-Za-z0-9!#$%&*+./:;=?@^_|~-]')
         return bool(invalid_regex.search(header))
-    
+
+    def merge_bam(self, samtools_folder):
+        """
+        Merges all .bam files, then 
+        sorts and indexes into .bai
+        """
+        bam_list = [*samtools_folder.glob("*.bam")] # detect .bam files
+        rm_list = [*samtools_folder.glob("*out.bam"), *samtools_folder.glob("*.sam")]
+
+        try:
+            subprocess.run(["samtools", "merge", ## merge all .bam files into one
+                            str(self.merged_bam), *map(str, bam_list)], ## asterisk = expand list & iterate through
+                            check = True, 
+                            capture_output = True,
+                            text = True)
+            subprocess.run(["rm", *map(str, rm_list)], ## remove original .sam and .bam files
+                            check = True, ## ensures this only runs if previous block was successful
+                            capture_output = True,
+                            text = True)
+
+        except subprocess.CalledProcessError as e: ## error handling
+            print(f"Failed to create {self.merged_bam.name} and convert to .bai: {e}")
+            print("STDERR:", e.stderr)
+            print("STDOUT:", e.stdout)
+            traceback.print_exc()
+            raise
+
     def sanitize_header(self):
         """
-        Sanitize .bam headers if incorrect regex detected
+        Sanitize .bam headers if incorrect regex detected,
+        then convert .bam to .bai
         """
         if not self.check_regex():
             print("No invalid characters detected in .bam headers.")
             return
-        
+
         else:
             try:
                 p1 = subprocess.Popen(self.open_file, 
@@ -140,38 +167,12 @@ class SamtoolsConversion:
                 print("STDOUT:", e.stdout)
                 traceback.print_exc()
                 raise
-
-    def merge_bam(self, samtools_folder):
-        """
-        Merges all .bam files, then 
-        sorts and indexes into .bai
-        """
-        bam_list = [*samtools_folder.glob("*.bam")] # detect .bam files
-        rm_list = [*samtools_folder.glob("*out.bam"), *samtools_folder.glob("*.sam")]
-
-        try:
-            subprocess.run(["samtools", "merge", ## merge all .bam files into one
-                            str(self.merged_bam), *map(str, bam_list)], ## asterisk = expand list & iterate through
-                            check = True, 
-                            capture_output = True,
-                            text = True)
-            self.sanitize_header()
-            subprocess.run(["samtools", "index", str(self.merged_bam)], ## create .bai from .bam
-                            check = True,
-                            capture_output = True,
-                            text = True)
-            subprocess.run(["rm", *map(str, rm_list)], ## remove original .sam and .bam files
-                            check = True, ## ensures this only runs if previous blocks were successful
-                            capture_output = True,
-                            text = True)
-
-        except subprocess.CalledProcessError as e: ## error handling
-            print(f"Failed to create {self.merged_bam.name} and convert to .bai: {e}")
-            print("STDERR:", e.stderr)
-            print("STDOUT:", e.stdout)
-            traceback.print_exc()
-            raise
-
+        
+        subprocess.run(["samtools", "index", str(self.merged_bam)], ## create .bai from .bam
+                        check = True,
+                        capture_output = True,
+                        text = True)
+        
 def rmcontam_pipeline(folder_path, output_path):
     if not os.path.exists(output_path):
         os.makedirs(output_path) ## if output_path doesn't already exist, create new empty output folder
@@ -208,6 +209,7 @@ def rmcontam_pipeline(folder_path, output_path):
             
             ## merge bam files, convert to bai, & remove files
             samtools.merge_bam(samtools_folder)
+            samtools.sanitize_header()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Run contaminant removal pipeline.")
