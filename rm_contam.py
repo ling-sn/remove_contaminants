@@ -108,11 +108,16 @@ class SamtoolsConversion:
         Checks if headers in .bam have correct regex
         """
         header = subprocess.run(self.open_file,
-                                check = True,
-                                capture_output = True,
-                                text = True).stdout
-        invalid_regex = re.compile(r'@SQ.*SN:[^A-Za-z0-9!#$%&*+./:;=?@^_|~-]')
-        return bool(invalid_regex.search(header))
+                                check=True,
+                                capture_output=True,
+                                text=True).stdout
+        all_sn = re.compile(r'SN:([^\s]+)')
+        valid_rgx = re.compile(r'^[A-Za-z0-9!#$%&*+./:;=?@^_|~-]+$')
+        for value in all_sn.finditer(header):
+            seqname = value.group(1) ## if header = @SQ SN:chr1, then this returns chr1
+            if not valid_rgx.match(seqname): ## sees if there are invalid charas
+                return True  # flagged
+        return False
 
     def merge_bam(self, samtools_folder):
         """
@@ -134,7 +139,7 @@ class SamtoolsConversion:
                             text = True)
 
         except subprocess.CalledProcessError as e: ## error handling
-            print(f"Failed to create {self.merged_bam.name} and convert to .bai: {e}")
+            print(f"Failed to created merged .bam file {self.merged_bam.name}: {e}")
             print("STDERR:", e.stderr)
             print("STDOUT:", e.stdout)
             traceback.print_exc()
@@ -145,16 +150,15 @@ class SamtoolsConversion:
         Sanitize .bam headers if incorrect regex detected,
         then convert .bam to .bai
         """
-        if not self.check_regex():
+        if self.check_regex() == False:
             print("No invalid characters detected in .bam headers.")
-            return
-
+        
         else:
             try:
                 p1 = subprocess.Popen(self.open_file, 
                                       stdout=subprocess.PIPE)
-                p2 = subprocess.Popen(["sed", "-E", 
-                                      r's/SN:([^A-Za-z0-9!#$%&*+.\/:;=?@^_|~-])//g'], 
+                p2 = subprocess.Popen(["perl", "-pe", 
+                                       "s/(SN:[^ \t]*)[^A-Za-z0-9!#$%&*+.\/:;=?@^_|~-]/$1/g"], 
                                       stdin=p1.stdout, 
                                       stdout=subprocess.PIPE)
                 p3 = subprocess.Popen(["samtools", "reheader", "-", 
@@ -162,7 +166,7 @@ class SamtoolsConversion:
                                        stdin=p2.stdout)
                 p3.communicate()
             except subprocess.CalledProcessError as e: ## error handling
-                print(f"Failed to modify regex in {self.merged_bam.name}: {e}")
+                print(f"Failed to modify regex in {self.merged_bam.name} and convert to .bai: {e}")
                 print("STDERR:", e.stderr)
                 print("STDOUT:", e.stdout)
                 traceback.print_exc()
