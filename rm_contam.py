@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 import traceback
 import argparse
+import re
 
 class Bowtie2Aligner:
     def __init__(self):
@@ -74,6 +75,12 @@ class Bowtie2Aligner:
             raise
         return result
     
+class SamtoolsConversion:
+    def __init__(self, samtools_folder, subfolder):
+        self.base_name = subfolder.stem.split("_")[0] # create general filestem
+        self.merged_bam = samtools_folder/f"{self.base_name}_mapped.bam" # merged output
+        self.open_file = ["samtools", "view", "-H", str(self.merged_bam)]
+
     def convert_sam(self, samtools_folder, file):
         """
         Converts .sam output from bowtie2 into .bam
@@ -96,32 +103,70 @@ class Bowtie2Aligner:
             traceback.print_exc()
             raise
 
-    def merge_bam(self, samtools_folder, file):
+    def check_regex(self):
+        """
+        Checks if headers in .bam have correct regex
+        """
+        header = subprocess.run(self.open_file,
+                                check = True,
+                                capture_output = True,
+                                text = True).stdout
+        invalid_regex = re.compile(r'@SQ.*SN:[^A-Za-z0-9!#$%&*+./:;=?@^_|~-]')
+        return bool(invalid_regex.search(header))
+    
+    def sanitize_header(self):
+        """
+        Sanitize .bam headers if incorrect regex detected
+        """
+        if not self.check_regex():
+            print("No invalid characters detected in .bam headers.")
+            return
+        
+        else:
+            try:
+                p1 = subprocess.Popen(self.open_file, 
+                                      stdout=subprocess.PIPE)
+                p2 = subprocess.Popen(["sed", "-E", 
+                                      r's/SN:([^A-Za-z0-9!#$%&*+.\/:;=?@^_|~-])//g'], 
+                                      stdin=p1.stdout, 
+                                      stdout=subprocess.PIPE)
+                p3 = subprocess.Popen(["samtools", "reheader", "-", 
+                                       str(self.merged_bam)], 
+                                       stdin=p2.stdout)
+                p3.communicate()
+            except subprocess.CalledProcessError as e: ## error handling
+                print(f"Failed to modify regex in {self.merged_bam.name}: {e}")
+                print("STDERR:", e.stderr)
+                print("STDOUT:", e.stdout)
+                traceback.print_exc()
+                raise
+
+    def merge_bam(self, samtools_folder):
         """
         Merges all .bam files, then 
         sorts and indexes into .bai
         """
-        base_name = file.stem.split("_")[0] # create general filestem
-        merged_bam = samtools_folder/f"{base_name}_mapped.bam" # merged output
         bam_list = [*samtools_folder.glob("*.bam")] # detect .bam files
         rm_list = [*samtools_folder.glob("*out.bam"), *samtools_folder.glob("*.sam")]
 
         try:
             subprocess.run(["samtools", "merge", ## merge all .bam files into one
-                            str(merged_bam), *map(str, bam_list)], ## asterisk = expand list & iterate through
+                            str(self.merged_bam), *map(str, bam_list)], ## asterisk = expand list & iterate through
                             check = True, 
                             capture_output = True,
                             text = True)
-            subprocess.run(["samtools", "index", str(merged_bam)], ## create .bai from .bam
+            self.sanitize_header(samtools_folder)
+            subprocess.run(["samtools", "index", str(self.merged_bam)], ## create .bai from .bam
                             check = True,
                             capture_output = True,
                             text = True)
             subprocess.run(["rm", *map(str, rm_list)], ## remove original .sam and .bam files
-                            check = True, ## ensures that this block only runs if previous 2 were successful
+                            check = True, ## ensures this only runs if previous blocks were successful
                             capture_output = True,
                             text = True)
+
         except subprocess.CalledProcessError as e: ## error handling
-            print(f"Failed to create {merged_bam.name} and convert to .bai: {e}")
+            print(f"Failed to create {self.merged_bam.name} and convert to .bai: {e}")
             print("STDERR:", e.stderr)
             print("STDOUT:", e.stdout)
             traceback.print_exc()
@@ -143,6 +188,7 @@ def rmcontam_pipeline(folder_path, output_path):
             processed_folder.mkdir(exist_ok=True) ## if directory already exists, suppress OSError
             samtools_folder = processed_folder/"samtools"
             samtools_folder.mkdir(exist_ok=True)
+            samtools = SamtoolsConversion(samtools_folder, subfolder)
 
             for file in subfolder.glob("*.fastq.gz"): ## iterate through indiv. files in subfolder
                 try:
@@ -153,7 +199,7 @@ def rmcontam_pipeline(folder_path, output_path):
                         aligner.paired_reads(file, processed_folder, samtools_folder)
 
                     ## run samtools function
-                    aligner.convert_sam(samtools_folder, file)
+                    samtools.convert_sam(samtools_folder, file)
                     
                 except Exception as e:
                     print(f"Failed to align {file.name} with bowtie2 and produce .bam files: {e}")
@@ -161,7 +207,8 @@ def rmcontam_pipeline(folder_path, output_path):
                     continue
             
             ## merge bam files, convert to bai, & remove files
-            aligner.merge_bam(samtools_folder, file)
+            samtools.sanitize_header()
+            samtools.merge_bam(samtools_folder, subfolder)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Run contaminant removal pipeline.")
