@@ -103,8 +103,8 @@ class Bowtie2Aligner:
         """
         base_name = file.stem.split("_")[0] # create general filestem
         merged_bam = samtools_folder/f"{base_name}_mapped.bam" # merged output
-        bam_list = list(samtools_folder.glob("*.bam")) # detect .bam files
-        rm_list = list(samtools_folder).glob("*out.bam") + list(samtools_folder.glob("*.sam"))
+        bam_list = [*samtools_folder.glob("*.bam")] # detect .bam files
+        rm_list = [*samtools_folder.glob("*out.bam"), *samtools_folder.glob("*.sam")]
 
         try:
             subprocess.run(["samtools", "merge", ## merge all .bam files into one
@@ -116,7 +116,7 @@ class Bowtie2Aligner:
                             check = True,
                             capture_output = True,
                             text = True)
-            subprocess.run(["rm", *map(str, rm_list)], ## remove original .sam files
+            subprocess.run(["rm", *map(str, rm_list)], ## remove original .sam and .bam files
                             check = True, ## ensures that this block only runs if previous 2 were successful
                             capture_output = True,
                             text = True)
