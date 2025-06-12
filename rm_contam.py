@@ -207,7 +207,7 @@ def rmcontam_pipeline(folder_path, output_path):
                     continue
             
             ## merge bam files, convert to bai, & remove files
-            samtools.merge_bam(samtools_folder, subfolder)
+            samtools.merge_bam(samtools_folder)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Run contaminant removal pipeline.")
