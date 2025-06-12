@@ -151,13 +151,15 @@ def rmcontam_pipeline(folder_path, output_path):
                         aligner.single_reads(file, processed_folder, samtools_folder)
                     elif "_unmerged" in file.name:
                         aligner.paired_reads(file, processed_folder, samtools_folder)
+
+                    ## run samtools function
+                    aligner.convert_sam(samtools_folder, file)
                 except Exception as e:
                     print(f"Failed to align {file.name} with bowtie2 and produce .bam files: {e}")
                     traceback.print_exc()
                     continue
             
-            ## run samtools function
-            aligner.convert_sam(samtools_folder, file)
+            ## merge bam files & convert to bai
             aligner.merge_bam(samtools_folder, file)
 
 if __name__ == "__main__":
