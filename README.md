@@ -1,4 +1,11 @@
 # **Removing contaminant human RNAs from processed fastp files**
+## Necessary files
+* `create_env.sbatch`
+* bowtie2 index
+  * OPTION 1: Copy over `build_index.py` and `build_index.sbatch` and run the SBATCH file.
+  * OPTION 2: Skip the bowtie2 index creation step by navigating into the `contaminants_index` folder and moving all `*.bt2` files into the parent directory.
+* `contaminants.fa`
+* `rm_contam.py` and `rm_contam.sbatch`
 ## Instructions
 1. Run `create_env.sbatch` to create the RNA-SEQ-2 conda environment
 3. Activate conda environment via `conda activate RNA-SEQ-2`
@@ -21,6 +28,3 @@ This allows you to test the script on example data.
 3. Follow Steps 1-3 from "Instructions" section (see above)
    * If running code in local Linux environment (_i.e._, WSL), copy/paste code from .sbatch files instead of directly running them
 4. Run `python3 rm_contam.py -u --input 7KO-Cyto-BS_processed_fastqs --output 7KO-Cyto-BS_filtered_processed_fastqs`
-## Using contaminants_index
-You can skip the bowtie2 index creation step by directly using the files in `contaminants_index`.
-* Before running your analysis, navigate into the folder and move all `*.bt2` files into the parent directory. 
