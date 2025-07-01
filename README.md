@@ -9,7 +9,8 @@
 1. Run `create_env.sbatch` to create the RNA-SEQ-2 conda environment
 3. Activate conda environment via `conda activate RNA-SEQ-2`
 4. Run `build_index.sbatch` one time to build contaminant index with bowtie2 (_optional_)
-5. Run `rm_contam.sbatch` to separate out contaminant RNAs from each fastq file
+5. Edit  rm_contam.sbatch` to match your experiments.
+6. Run `rm_contam.sbatch` to separate out contaminant RNAs from each fastq file
 ## Tools used in contaminant removal script
 * **bowtie2** is used to align single-end reads (merged/unpaired) and paired reads (unmerged) according to the contaminants index
 * **samtools** is used to convert the .sam outputs from bowtie2 into compressed .bam and .bai files
