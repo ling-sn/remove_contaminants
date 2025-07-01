@@ -3,7 +3,7 @@
 * `create_env.sbatch`
 * bowtie2 index
   * **Option 1:** Copy over `build_index.py` and `build_index.sbatch` and run the SBATCH file.
-  * **Option 2:** Skip the bowtie2 index creation by navigating into the `contaminants_index` folder and moving all `*.bt2` files into the parent directory.
+  * **Option 2:** Skip bowtie2 index creation by navigating into the `contaminants_index` folder and moving all `*.bt2` files into the parent directory.
 * `contaminants.fa`
 * `rm_contam.py` and `rm_contam.sbatch`
 ## Instructions
