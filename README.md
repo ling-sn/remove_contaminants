@@ -2,9 +2,8 @@
 ## Necessary files
 * `create_env.sbatch`
 * bowtie2 index
-  * **Option 1 (Manual):** First, move `contaminants.fa` to the working directory containing your data folders. Then, copy over `build_index.py` and `build_index.sbatch` and run the SBATCH file.
+  * **Option 1 (Manual):** First, copy `contaminants.fa` to the working directory containing your data folders. Then, copy over `build_index.py` and `build_index.sbatch` and run the SBATCH file.
   * **Option 2 (Automatic):** Skip bowtie2 index creation by navigating into the `contaminants_index` folder and moving all `*.bt2` files into the parent directory.
-* `contaminants.fa`(only if manually building index)
 * `rm_contam.py` and `rm_contam.sbatch`
 ## Instructions
 1. Run `create_env.sbatch` to create the RNA-SEQ-2 conda environment
