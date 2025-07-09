@@ -4,7 +4,7 @@
 
 * bowtie2 index
   * **Option 1 (Manual):** First, copy `contaminants.fa` to the working directory containing your data folders. Then, copy over `build_index.py` and `build_index.sbatch` and run the SBATCH file.
-  * **Option 2 (Pre-Built):** Skip bowtie2 index creation by navigating into the `contaminants_index` folder and moving all `*.bt2` files into the working directory.
+  * **Option 2 (Pre-Built; Recommended):** Skip bowtie2 index creation by navigating into the `contaminants_index` folder and moving all `*.bt2` files into the working directory.
 * `create_env.sbatch`
 * `rm_contam.py` and `rm_contam.sbatch`
 ## Instructions
