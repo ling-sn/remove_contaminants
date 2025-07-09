@@ -1,6 +1,6 @@
 # **Removing contaminant human RNAs from processed fastp files**
 ## Necessary files
-<img src="https://github.com/user-attachments/assets/36c3a2b7-2e37-4377-b131-e5fba40acf9e" width="600"/>
+<img src="https://github.com/user-attachments/assets/54af626d-27a8-49e1-9822-62c617c1f937" width="400"/>
 
 * bowtie2 index
   * **Option 1 (Manual):** First, copy `contaminants.fa` to the working directory containing your data folders. Then, copy over `build_index.py` and `build_index.sbatch` and run the SBATCH file.
