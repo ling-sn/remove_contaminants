@@ -1,14 +1,16 @@
 # **Removing contaminant human RNAs from processed fastp files**
 ## Necessary files
-* `create_env.sbatch`
+<img src="https://github.com/user-attachments/assets/36c3a2b7-2e37-4377-b131-e5fba40acf9e" width="600"/>
+
 * bowtie2 index
   * **Option 1 (Manual):** First, copy `contaminants.fa` to the working directory containing your data folders. Then, copy over `build_index.py` and `build_index.sbatch` and run the SBATCH file.
   * **Option 2 (Pre-Built):** Skip bowtie2 index creation by navigating into the `contaminants_index` folder and moving all `*.bt2` files into the working directory.
+* `create_env.sbatch`
 * `rm_contam.py` and `rm_contam.sbatch`
 ## Instructions
 1. Run `create_env.sbatch` to create the RNA-SEQ-2 conda environment
 3. Activate conda environment via `conda activate RNA-SEQ-2`
-4. Run `build_index.sbatch` one time to build contaminant index with bowtie2 (_optional_)
+4. Create bowtie2 index (choose manual vs. pre-built method)
 5. Edit `rm_contam.sbatch` to match your experiments
 6. Run `rm_contam.sbatch` to separate out contaminant RNAs from each fastq file
 ## Tools used in contaminant removal script
@@ -21,10 +23,3 @@ This is applied after running the fastp script on your raw data (fastq files).
  * rRNA online source: [fallerlab](https://github.com/fallerlab/ARF/blob/main/rRNAs/4V6X_human_rRNAs.fa)
  * tRNA online source: [GtRNAdb](https://gtrnadb.ucsc.edu/genomes/eukaryota/Hsapi38/Hsapi38-seq.html)
  * snoRNA online source: [snoRNABase](https://www-snorna.biotoul.fr/browse.php)
-## Using the test data
-This allows you to test the script on example data.
-1. Navigate to `test` folder
-2. Run `mv 7KO-Cyto-BS_processed_fastqs ../` and navigate back to parent folder
-3. Follow Steps 1-3 from "Instructions" section (see above)
-   * If running code in local Linux environment (_i.e._, WSL), copy/paste code from .sbatch files instead of directly running them
-4. Run `python3 rm_contam.py -u --input 7KO-Cyto-BS_processed_fastqs --output 7KO-Cyto-BS_filtered_processed_fastqs`
