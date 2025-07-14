@@ -18,6 +18,12 @@
 * **samtools** is used to convert the .sam outputs from bowtie2 into compressed .bam and .bai files
 ## When do I use this pipeline?
 This is applied after running the fastp script on your raw data (fastq files). 
+## Understanding the rm_contam SBATCH
+```
+python3 rm_contam.py -u --input 7KO-Cyto-BS_processed_fastqs --output 7KO-Cyto-BS_filtered_processed_fastqs
+```
+* **--input:** Name of folder containing merged, paired, and unpaired fastqs. DO NOT INPUT A PATH.
+* **--output:** Name of desired output folder.
 ## Additional information about contaminants FASTA
 `contaminants.fa` contains human rRNA, tRNA, snoRNA, and snRNA sequences sourced from the anRNAlab genomic database and various online sources.
  * rRNA online source: [fallerlab](https://github.com/fallerlab/ARF/blob/main/rRNAs/4V6X_human_rRNAs.fa)
