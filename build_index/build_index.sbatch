@@ -24,7 +24,7 @@
 # This requires a conda environment for genome alignment, edit to your named version in the activate command
 # 
 # To call this script:
-# sbatch SBATCH-arrXXX.sbatch
+# sbatch build_index.sbatch
 ################################################################################
 
 module purge
