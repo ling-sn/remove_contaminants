@@ -26,7 +26,7 @@
 # before running this file 
 # 
 # To call this script:
-# sbatch remove_contaminants.sbatch
+# sbatch rm_contam.sbatch
 ################################################################################
 
 module purge
