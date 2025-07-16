@@ -1,4 +1,4 @@
-# **Removing contaminant human RNAs from processed fastp files**
+# **Removing contaminant human RNAs from processed fastqs**
 ## Necessary files
 <img src="https://github.com/user-attachments/assets/54af626d-27a8-49e1-9822-62c617c1f937" width="400"/>
 
