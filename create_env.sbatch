@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=create_env
-#SBATCH --mail-user=lingsn@umich.edu
+#SBATCH --mail-user=YOUR_UNIQNAME@umich.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --output=/dev/null
 #SBATCH --account=cweidman0
