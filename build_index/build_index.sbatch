@@ -21,7 +21,8 @@
 # For more info on #SBATCH variables, see https://arc.umich.edu/greatlakes/slurm-user-guide/
 # and https://slurm.schedmd.com/sbatch.html
 #
-# This requires a conda environment for genome alignment, edit to your named version in the activate command
+# This requires a conda environment with samtools and bowtie2 (RNA-SEQ-2), run create_env.sbatch 
+# before running this file
 # 
 # To call this script:
 # sbatch build_index.sbatch
