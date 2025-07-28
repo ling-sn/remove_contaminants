@@ -12,6 +12,11 @@
 3. Activate conda environment via `conda activate RNA-SEQ-2`
 4. Create bowtie2 index (choose manual vs. pre-built method)
 5. Edit `rm_contam.sbatch` to match your experiments
+   * Change the following:
+     * `#SBATCH --mail-user=YOUR_UNIQNAME@umich.edu`
+     * `#SBATCH --array=0-11%4`
+     * `#SBATCH --time=4:00:00`
+     * Strings under `declare -a tasks=(`
 6. Run `rm_contam.sbatch` to separate out contaminant RNAs from each fastq file
 ### Tools used in contaminant removal script
 * **bowtie2** is used to align single-end reads (merged/unpaired) and paired reads (unmerged) according to the contaminants index
