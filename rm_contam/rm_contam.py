@@ -1,12 +1,14 @@
+import os
 import subprocess
 from pathlib import Path
 import traceback
 import argparse
 
 class Bowtie2Aligner:
-    def __init__(self, current_path):
-        self.contaminants_dir = current_path/"contaminants.fa"
-        self.bowtie2_index = current_path/"contaminants_index"
+    def __init__(self):
+        self.current_path = Path.cwd()
+        self.contaminants_dir = self.current_path/"contaminants.fa"
+        self.bowtie2_index = self.current_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
         
@@ -15,9 +17,9 @@ class Bowtie2Aligner:
         Align single-end reads (merged/unpaired)
         """
         try:
-            sam_output = samtools_folder/f"{file.with_suffix("")}_mapped.sam"
-            rmcontam_output = processed_folder/f"{file.with_suffix("")}_unmapped.fastq.gz"
-            contam_output = processed_folder/f"{file.with_suffix("")}_mapped.fastq.gz"
+            sam_output = samtools_folder/f"{file.stem}_mapped.sam" ## file.stem = filename w/o both extensions
+            rmcontam_output = processed_folder/f"{file.stem}_unmapped.fastq.gz"
+            contam_output = processed_folder/f"{file.stem}_mapped.fastq.gz"
             cmd = ["bowtie2", 
                     "-x", str(self.bowtie2_index), ## provides index that we created earlier
                     "-U", str(file), ## specifies single-read
@@ -29,7 +31,7 @@ class Bowtie2Aligner:
                                     capture_output = True, 
                                     text = True)
         except subprocess.CalledProcessError as e: ## error handling
-            print(f"Failed to align merged or unpaired fastq file {file.with_suffix("")}: {e}")
+            print(f"Failed to align merged or unpaired fastq file {file.name}: {e}")
             print("STDERR:", e.stderr)
             print("STDOUT:", e.stdout)
             traceback.print_exc()
@@ -49,9 +51,9 @@ class Bowtie2Aligner:
         Align paired-end reads (unmerged)
         """
         try:
-            sam_output = samtools_folder/f"{file.with_suffix("")}_mapped.sam"
-            rmcontam_output = processed_folder/f"{file.with_suffix("")}_unmapped.fastq.gz"
-            contam_output = processed_folder/f"{file.with_suffix("")}_mapped.fastq.gz"
+            sam_output = samtools_folder/f"{file.stem}_mapped.sam" ## file.stem = filename w/o both extensions
+            rmcontam_output = processed_folder/f"{file.stem}_unmapped.fastq.gz"
+            contam_output = processed_folder/f"{file.stem}_mapped.fastq.gz"
             self.detect_reps(file.parent)
             cmd = ["bowtie2",
                     "-x", str(self.bowtie2_index),
@@ -65,7 +67,7 @@ class Bowtie2Aligner:
                                     capture_output = True, 
                                     text = True)
         except subprocess.CalledProcessError as e: ## error handling
-            print(f"Failed to align unmerged fastq file {file.with_suffix("")}: {e}")
+            print(f"Failed to align unmerged fastq file {file.name}: {e}")
             print("STDERR:", e.stderr)
             print("STDOUT:", e.stdout)
             traceback.print_exc()
@@ -76,7 +78,7 @@ class Bowtie2Aligner:
         """
         Converts .sam output from bowtie2 into .bam
         """
-        sam_input = samtools_folder/f"{file.name}_mapped.sam"
+        sam_input = samtools_folder/f"{file.stem}_mapped.sam"
         sam_filename = Path(sam_input).stem
         bam_output = samtools_folder/f"{sam_filename}_out.bam"
 
@@ -125,20 +127,22 @@ class Bowtie2Aligner:
             traceback.print_exc()
             raise
 
-def rmcontam_pipeline(folder_name):
-    ## define input directory
-    current_path = Path.cwd()
-    input_dir = current_path/folder_name
+def rmcontam_pipeline(folder_path, output_path):
+    if not os.path.exists(output_path):
+        os.makedirs(output_path) ## if output_path doesn't already exist, create new empty output folder
+
+    input_dir = Path(folder_path) ## used Path to improve readability of code below
+    output_dir = Path(output_path)
 
     ## initialize class
-    aligner = Bowtie2Aligner(current_path)
+    aligner = Bowtie2Aligner()
 
     for subfolder in input_dir.iterdir(): ## amount of subfolders = number of replicates
         if subfolder.is_dir():
-            processed_folder = current_path/"filtered_processed_fastqs"/folder_name/f"{subfolder.name}"
-            processed_folder.mkdir(exist_ok=True, parents=True)
+            processed_folder = output_dir/f"{subfolder.name}_bowtie2" ## processed folders for bowtie2 outputs
+            processed_folder.mkdir(exist_ok=True) ## if directory already exists, suppress OSError
             samtools_folder = processed_folder/"samtools"
-            samtools_folder.mkdir(exist_ok=True, parents=True)
+            samtools_folder.mkdir(exist_ok=True)
 
             for file in subfolder.glob("*.fastq.gz"): ## iterate through indiv. files in subfolder
                 try:
@@ -161,10 +165,12 @@ def rmcontam_pipeline(folder_name):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Run contaminant removal pipeline.")
-    parser.add_argument("--folder_name", required = True, help = "Input processed_fastqs folder name")
+    parser.add_argument("--input", required = True, help = "Input processed_fastqs folder name")
+    parser.add_argument("--output", required = True, help = "Desired output folder name for processed files")
+    parser.add_argument("-u", "--unzip", action = "store_true", help = "Unzips fastq files")
 
     args = parser.parse_args()
 
     print("Starting contaminant removal pipeline...")
-    rmcontam_pipeline(args.folder_name)
+    rmcontam_pipeline(args.input, args.output)
     print("Pipeline finished.")
