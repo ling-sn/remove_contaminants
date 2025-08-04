@@ -15,9 +15,9 @@ class Bowtie2Aligner:
         Align single-end reads (merged/unpaired)
         """
         try:
-            sam_output = samtools_folder/f"{file.with_suffix('')}_mapped.sam"
-            rmcontam_output = processed_folder/f"{file.with_suffix('')}_unmapped.fastq.gz"
-            contam_output = processed_folder/f"{file.with_suffix('')}_mapped.fastq.gz"
+            sam_output = samtools_folder/f"{file.with_suffix("")}_mapped.sam"
+            rmcontam_output = processed_folder/f"{file.with_suffix("")}_unmapped.fastq.gz"
+            contam_output = processed_folder/f"{file.with_suffix("")}_mapped.fastq.gz"
             cmd = ["bowtie2", 
                     "-x", str(self.bowtie2_index), ## provides index that we created earlier
                     "-U", str(file), ## specifies single-read
@@ -29,7 +29,7 @@ class Bowtie2Aligner:
                                     capture_output = True, 
                                     text = True)
         except subprocess.CalledProcessError as e: ## error handling
-            print(f"Failed to align merged or unpaired fastq file {file.with_suffix('')}: {e}")
+            print(f"Failed to align merged or unpaired fastq file {file.with_suffix("")}: {e}")
             print("STDERR:", e.stderr)
             print("STDOUT:", e.stdout)
             traceback.print_exc()
@@ -49,9 +49,9 @@ class Bowtie2Aligner:
         Align paired-end reads (unmerged)
         """
         try:
-            sam_output = samtools_folder/f"{file.with_suffix('')}_mapped.sam"
-            rmcontam_output = processed_folder/f"{file.with_suffix('')}_unmapped.fastq.gz"
-            contam_output = processed_folder/f"{file.with_suffix('')}_mapped.fastq.gz"
+            sam_output = samtools_folder/f"{file.with_suffix("")}_mapped.sam"
+            rmcontam_output = processed_folder/f"{file.with_suffix("")}_unmapped.fastq.gz"
+            contam_output = processed_folder/f"{file.with_suffix("")}_mapped.fastq.gz"
             self.detect_reps(file.parent)
             cmd = ["bowtie2",
                     "-x", str(self.bowtie2_index),
@@ -65,7 +65,7 @@ class Bowtie2Aligner:
                                     capture_output = True, 
                                     text = True)
         except subprocess.CalledProcessError as e: ## error handling
-            print(f"Failed to align unmerged fastq file {file.with_suffix('')}: {e}")
+            print(f"Failed to align unmerged fastq file {file.with_suffix("")}: {e}")
             print("STDERR:", e.stderr)
             print("STDOUT:", e.stdout)
             traceback.print_exc()
