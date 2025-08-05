@@ -151,8 +151,9 @@ def rmcontam_pipeline(folder_name, bamfile):
             unmapped_folder = current_path/"filtered_processed_fastqs"/"removed_contam"/folder_name/f"{subfolder.name}"
             unmapped_folder.mkdir(exist_ok=True, parents=True)
 
+            
+            samtools_folder = mapped_folder/"samtools"
             if bamfile:
-                samtools_folder = mapped_folder/"samtools"
                 samtools_folder.mkdir(exist_ok=True, parents=True)
 
             for file in subfolder.glob("*.fastq.gz"): ## iterate through indiv. files in subfolder
