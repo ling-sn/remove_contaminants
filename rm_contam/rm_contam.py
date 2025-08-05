@@ -5,7 +5,6 @@ import argparse
 
 class Bowtie2Aligner:
     def __init__(self, current_path):
-        self.contaminants_dir = current_path/"contaminants.fa"
         self.bowtie2_index = current_path/"contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
