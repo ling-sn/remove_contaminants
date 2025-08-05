@@ -23,7 +23,6 @@ class Bowtie2Aligner:
             cmd = ["bowtie2", 
                     "-x", str(self.bowtie2_index), ## provides index that we created earlier
                     "-U", str(file), ## specifies single-read
-                    "-S", str(sam_output), ## .sam file of contam reads
                     "--un-gz", str(rmcontam_output), ## merged/unpaired reads that failed to align (mrna)
                     "--al-gz", str(contam_output)] ## merged/unpaired reads that aligned ≥1 times
             if bamfile:
@@ -161,9 +160,8 @@ def rmcontam_pipeline(folder_name, bamfile):
                         aligner.single_reads(bamfile, file, mapped_folder, unmapped_folder, samtools_folder)
                     elif "_unmerged" in file.name:
                         aligner.paired_reads(bamfile, file, mapped_folder, unmapped_folder, samtools_folder)
-                    else:
-                        continue
 
+                    ## if user requests it, then a BAM file will be outputted
                     if bamfile:
                         ## run samtools function
                         aligner.convert_sam(samtools_folder, file)
