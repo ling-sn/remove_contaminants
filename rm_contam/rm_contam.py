@@ -85,7 +85,8 @@ class Bowtie2Aligner:
         """
         Converts .sam output from bowtie2 into .bam
         """
-        sam_input = samtools_folder/f"{file.name}_mapped.sam"
+        filename = file.name.split(".")[0]
+        sam_input = samtools_folder/f"{filename}_mapped.sam"
         sam_filename = Path(sam_input).stem
         bam_output = samtools_folder/f"{sam_filename}_out.bam"
 
