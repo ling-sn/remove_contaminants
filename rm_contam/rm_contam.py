@@ -54,15 +54,15 @@ class Bowtie2Aligner:
         """
         Align paired-end reads (unmerged)
         """
-        filename = file.name.rsplit("_R1_", 1)[0]
-        base_name = file.name.split(".")[0]
+        self.detect_reps(file.parent)
+        filename = self.r1_filename.name.rsplit("_R1_", 1)[0]
+        base_name = self.r1_filename.name.split(".")[0]
         read_type = base_name.replace("_R1_", "_R%_")
 
         try:
             sam_output = samtools_folder/f"{filename}_mapped.sam"
             contam_output = mapped_folder/f"{read_type}_mapped.fastq.gz"
             rmcontam_output = unmapped_folder/f"{read_type}_unmapped.fastq.gz"
-            self.detect_reps(file.parent)
 
             cmd = ["bowtie2",
                     "-x", str(self.bowtie2_index),
@@ -91,35 +91,38 @@ class Bowtie2Aligner:
         """
         Converts .sam output from bowtie2 into .bam
         """
-        if "_merged" in file.name or "_unpaired" in file.name:
-            filename = file.name.split(".")[0]
-        elif "_unmerged" in file.name:
-            filename = file.name.rsplit("_R1_", 1)[0]
-        sam_input = samtools_folder/f"{filename}_mapped.sam"
-        sam_filename = Path(sam_input).stem
-        bam_output = samtools_folder/f"{sam_filename}_out.bam"
+        sam_list = [*samtools_folder.glob("*.sam")] # detect .sam files
+        
+        for samfile in sam_list:
+            if "_merged" in samfile or "_unpaired" in samfile:
+                filename = file.name.split(".")[0]
+            elif "_unmerged" in samfile:
+                filename = self.r1_filename.name.rsplit("_R1_", 1)[0]
+                
+            sam_input = samtools_folder/f"{filename}_mapped.sam"
+            sam_filename = Path(sam_input).stem
+            bam_output = samtools_folder/f"{sam_filename}_out.bam"
 
-        try:
-            subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
-                            "-o", str(bam_output), ## output file name
-                            str(sam_input)], ## input file name
-                            check = True,
-                            capture_output = True,
-                            text = True)
-        except subprocess.CalledProcessError as e: ## error handling
-            print(f"Failed to convert {sam_input.name} to .bam: {e}")
-            print("STDERR:", e.stderr)
-            print("STDOUT:", e.stdout)
-            traceback.print_exc()
-            raise
+            try:
+                subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
+                                "-o", str(bam_output), ## output file name
+                                str(sam_input)], ## input file name
+                                check = True,
+                                capture_output = True,
+                                text = True)
+            except subprocess.CalledProcessError as e: ## error handling
+                print(f"Failed to convert {sam_input.name} to .bam: {e}")
+                print("STDERR:", e.stderr)
+                print("STDOUT:", e.stdout)
+                traceback.print_exc()
+                raise
 
     def merge_bam(self, samtools_folder, file):
         """
         Merges all .bam files, then 
         sorts and indexes into .bai
         """
-        filename = file.name.split(".")[0]
-        base_name = filename.rsplit("_", 1)[0] # create general filestem
+        base_name = file.stem.split("_")[0] # create general filestem
         merged_bam = samtools_folder/f"{base_name}_mapped.bam" # merged output
         bam_list = [*samtools_folder.glob("*.bam")] # detect .bam files
         rm_list = [*samtools_folder.glob("*out.bam"), *samtools_folder.glob("*.sam")]
@@ -172,6 +175,8 @@ def rmcontam_pipeline(folder_name, bamfile):
                         aligner.single_reads(bamfile, file, mapped_folder, unmapped_folder, samtools_folder)
                     elif "_unmerged_R1" in file.name:
                         aligner.paired_reads(bamfile, file, mapped_folder, unmapped_folder, samtools_folder)
+                    else:
+                        continue
 
                     ## if user requests it, then a BAM file will be outputted
                     if bamfile:
