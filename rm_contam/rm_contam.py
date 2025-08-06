@@ -46,7 +46,7 @@ class Bowtie2Aligner:
         """
         Defines unmerged R1 and R2 filename variables
         """
-        for r1_file in subfolder.glob("*unmerged_R1*"):
+        for r1_file in subfolder.glob("*_unmerged_R1_*"):
             self.r1_filename = r1_file
             self.r2_filename = r1_file.with_name(r1_file.name.replace("_R1_", "_R2_"))
 
@@ -164,7 +164,7 @@ def rmcontam_pipeline(folder_name, bamfile):
                     ## run bowtie2 alignment functions
                     if "_merged" in file.name or "_unpaired" in file.name:
                         aligner.single_reads(bamfile, file, mapped_folder, unmapped_folder, samtools_folder)
-                    elif "_unmerged" in file.name:
+                    elif "_unmerged_R1" in file.name:
                         aligner.paired_reads(bamfile, file, mapped_folder, unmapped_folder, samtools_folder)
 
                     ## if user requests it, then a BAM file will be outputted
