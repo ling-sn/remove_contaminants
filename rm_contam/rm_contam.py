@@ -25,6 +25,8 @@ class Bowtie2Aligner:
                     "-U", str(file), ## specifies single-read
                     "--un-gz", str(rmcontam_output), ## merged/unpaired reads that failed to align (mrna)
                     "--al-gz", str(contam_output)] ## merged/unpaired reads that aligned ≥1 times
+            if not bamfile:
+                cmd.extend(["-S", "/dev/null"]) ## get empty output
             if bamfile:
                 cmd.extend(["-S", str(sam_output)]) ## .sam file of contam reads
                 
@@ -66,6 +68,8 @@ class Bowtie2Aligner:
                     "-2", str(self.r2_filename),
                     "--un-conc-gz", str(rmcontam_output), ## unmerged reads that failed to align (mrna)
                     "--al-conc-gz", str(contam_output)] ## unmerged reads that aligned ≥1 times
+            if not bamfile:
+                cmd.extend(["-S", "/dev/null"]) ## get empty output
             if bamfile:
                 cmd.extend(["-S", str(sam_output)]) ## .sam file of contam reads
 
