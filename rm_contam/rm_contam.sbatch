@@ -6,7 +6,7 @@
 #SBATCH --array=0-11%4
 #SBATCH --account=cweidman0
 #SBATCH --time=4:00:00
-#SBATCH --mem=20000m
+#SBATCH --mem=30000m
 #SBATCH --partition=standard
 #SBATCH --ntasks-per-node=2
 #SBATCH --nodes=1
