@@ -54,11 +54,11 @@ class Bowtie2Aligner:
         """
         Align paired-end reads (unmerged)
         """
-        filename = file.name.split(".")[0]
+        filename = file.name.rsplit("_R1_", 1)[0]
         readtype = filename.with_name(filename.name.replace("_R1_", "_R%_"))
 
         try:
-            sam_output = samtools_folder/f"{filename.name.rsplit("_R1_", 1)[0]}_mapped.sam"
+            sam_output = samtools_folder/f"{filename}_mapped.sam"
             contam_output = mapped_folder/f"{readtype}_mapped.fastq.gz"
             rmcontam_output = unmapped_folder/f"{readtype}_unmapped.fastq.gz"
             self.detect_reps(file.parent)
@@ -90,7 +90,10 @@ class Bowtie2Aligner:
         """
         Converts .sam output from bowtie2 into .bam
         """
-        filename = file.name.split(".")[0]
+        if "_merged" in file.name or "_unpaired" in file.name:
+            filename = file.name.split(".")[0]
+        elif "_unmerged" in file.name:
+            filename = file.name.rsplit("_R1_", 1)[0]
         sam_input = samtools_folder/f"{filename}_mapped.sam"
         sam_filename = Path(sam_input).stem
         bam_output = samtools_folder/f"{sam_filename}_out.bam"
@@ -114,7 +117,8 @@ class Bowtie2Aligner:
         Merges all .bam files, then 
         sorts and indexes into .bai
         """
-        base_name = file.stem.split("_")[0] # create general filestem
+        filename = file.name.split(".")[0]
+        base_name = filename.rsplit("_", 1)[0] # create general filestem
         merged_bam = samtools_folder/f"{base_name}_mapped.bam" # merged output
         bam_list = [*samtools_folder.glob("*.bam")] # detect .bam files
         rm_list = [*samtools_folder.glob("*out.bam"), *samtools_folder.glob("*.sam")]
