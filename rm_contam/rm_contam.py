@@ -55,7 +55,7 @@ class Bowtie2Aligner:
         Align paired-end reads (unmerged)
         """
         self.detect_reps(file.parent)
-        filename = self.r1_filename.name.rsplit("_R1_", 1)[0]
+        filename = self.r1_filename.name.split("_R1_", 1)[0]
         base_name = self.r1_filename.name.split(".")[0]
         read_type = base_name.replace("_R1_", "_R%_")
 
@@ -91,31 +91,28 @@ class Bowtie2Aligner:
         """
         Converts .sam output from bowtie2 into .bam
         """
-        sam_list = [*samtools_folder.glob("*.sam")] # detect .sam files
-        
-        for samfile in sam_list:
-            if "_merged" in samfile or "_unpaired" in samfile:
-                filename = file.name.split(".")[0]
-            elif "_unmerged" in samfile:
-                filename = self.r1_filename.name.rsplit("_R1_", 1)[0]
+        if "_merged" in file.name or "_unpaired" in file.name:
+            filename = file.name.split(".")[0]
+        elif "_unmerged_R1" in file.name:
+            filename = self.r1_filename.name.split("_R1_", 1)[0]
                 
-            sam_input = samtools_folder/f"{filename}_mapped.sam"
-            sam_filename = Path(sam_input).stem
-            bam_output = samtools_folder/f"{sam_filename}_out.bam"
+        sam_input = samtools_folder/f"{filename}_mapped.sam"
+        sam_filename = Path(sam_input).stem
+        bam_output = samtools_folder/f"{sam_filename}_out.bam"
 
-            try:
-                subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
-                                "-o", str(bam_output), ## output file name
-                                str(sam_input)], ## input file name
-                                check = True,
-                                capture_output = True,
-                                text = True)
-            except subprocess.CalledProcessError as e: ## error handling
-                print(f"Failed to convert {sam_input.name} to .bam: {e}")
-                print("STDERR:", e.stderr)
-                print("STDOUT:", e.stdout)
-                traceback.print_exc()
-                raise
+        try:
+            subprocess.run(["samtools", "sort", "-O", "BAM", ## convert .sam to .bam and sort
+                            "-o", str(bam_output), ## output file name
+                            str(sam_input)], ## input file name
+                            check = True,
+                            capture_output = True,
+                            text = True)
+        except subprocess.CalledProcessError as e: ## error handling
+            print(f"Failed to convert {sam_input.name} to .bam: {e}")
+            print("STDERR:", e.stderr)
+            print("STDOUT:", e.stdout)
+            traceback.print_exc()
+            raise
 
     def merge_bam(self, samtools_folder, file):
         """
