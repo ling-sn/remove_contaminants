@@ -1,10 +1,14 @@
 ## <ins>**Removing contaminant human RNAs from processed fastqs**</ins>
 ### Necessary files
-<img src="https://github.com/user-attachments/assets/54af626d-27a8-49e1-9822-62c617c1f937" width="400"/>
+<img src="https://github.com/user-attachments/assets/dd9b3eac-c863-4a70-85b4-281248d120ad" width="400"/>
 
 * bowtie2 index
-  * **Option 1 (Manual):** First, copy `contaminants.fa` to the working directory containing your data folders. Then, copy over `build_index.py` and `build_index.sbatch` and run the SBATCH file.
-  * **Option 2 (Pre-Built; Recommended):** Skip bowtie2 index creation by navigating into the `contaminants_index` folder and moving all `*.bt2` files into the working directory.
+  * **Option 1 (Pre-Built; Recommended):** Skip bowtie2 index creation by using the permanent directory `~/umms-RNAlabDATA/Software/genome_indices/bowtie2_contam_index/contaminants_index`. This is already included in the code by default, so nothing additional needs to be done.
+  * **Option 2 (Manual):** First, copy `contaminants.fa` to the working directory containing your data folders. Then, copy over `build_index.py` and `build_index.sbatch` and run the SBATCH file. Finally, navigate into `rm_contam.py` and edit the code in the Bowtie2Aligner class to match the directory of your index:
+    
+    ```
+    self.bowtie2_index = "/<YOUR_DIRECTORY>/contaminants_index"
+    ```
 * `create_env.sbatch`
 * `rm_contam.py` and `rm_contam.sbatch`
 ### Instructions
