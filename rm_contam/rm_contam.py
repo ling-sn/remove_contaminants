@@ -4,8 +4,8 @@ import traceback
 import argparse
 
 class Bowtie2Aligner:
-    def __init__(self, current_path):
-        self.bowtie2_index = current_path/"contaminants_index"
+    def __init__(self):
+        self.bowtie2_index = "~/umms-RNAlabDATA/Software/genome_indices/bowtie2_contam_index/contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
         
@@ -21,7 +21,7 @@ class Bowtie2Aligner:
             rmcontam_output = unmapped_folder/f"{filename}_unmapped.fastq.gz"
 
             cmd = ["bowtie2", 
-                    "-x", str(self.bowtie2_index), ## provides index that we created earlier
+                    "-x", str(self.bowtie2_index), ## provides index
                     "-U", str(file), ## specifies single-read
                     "--un-gz", str(rmcontam_output), ## merged/unpaired reads that failed to align (mrna)
                     "--al-gz", str(contam_output)] ## merged/unpaired reads that aligned ≥1 times
@@ -151,7 +151,7 @@ def rmcontam_pipeline(folder_name, bamfile):
     input_dir = current_path/folder_name
 
     ## initialize class
-    aligner = Bowtie2Aligner(current_path)
+    aligner = Bowtie2Aligner()
 
     for subfolder in input_dir.iterdir(): ## amount of subfolders = number of replicates
         if subfolder.is_dir():
