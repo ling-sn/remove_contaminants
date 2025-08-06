@@ -55,11 +55,12 @@ class Bowtie2Aligner:
         Align paired-end reads (unmerged)
         """
         filename = file.name.split(".")[0]
+        readtype = filename.with_name(filename.name.replace("_R1_", "_R%_"))
 
         try:
-            sam_output = samtools_folder/f"{filename}_mapped.sam"
-            contam_output = mapped_folder/f"{filename}_mapped.fastq.gz"
-            rmcontam_output = unmapped_folder/f"{filename}_unmapped.fastq.gz"
+            sam_output = samtools_folder/f"{filename.name.rsplit("_R1_", 1)[0]}_mapped.sam"
+            contam_output = mapped_folder/f"{readtype}_mapped.fastq.gz"
+            rmcontam_output = unmapped_folder/f"{readtype}_unmapped.fastq.gz"
             self.detect_reps(file.parent)
 
             cmd = ["bowtie2",
