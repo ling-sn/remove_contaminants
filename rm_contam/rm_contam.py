@@ -4,8 +4,8 @@ import traceback
 import argparse
 
 class Bowtie2Aligner:
-    def __init__(self):
-        self.bowtie2_index = "~/umms-RNAlabDATA/Software/genome_indices/bowtie2_contam_index/contaminants_index"
+    def __init__(self, current_path):
+        self.bowtie2_index = current_path/"umms-RNAlabDATA/Software/genome_indices/bowtie2_contam_index/contaminants_index"
         self.r1_filename = None
         self.r2_filename = None
         
@@ -151,7 +151,7 @@ def rmcontam_pipeline(folder_name, bamfile):
     input_dir = current_path/folder_name
 
     ## initialize class
-    aligner = Bowtie2Aligner()
+    aligner = Bowtie2Aligner(current_path)
 
     for subfolder in input_dir.iterdir(): ## amount of subfolders = number of replicates
         if subfolder.is_dir():
