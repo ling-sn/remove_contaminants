@@ -25,7 +25,7 @@
 * This script is used after running `run_fastp` on your raw data.
 ### What does this script do?
 * The resulting merged, unmerged, and unpaired fastqs from `run_fastp` are aligned to a contaminants FASTA using bowtie2.
-  * The output folder from this process is split into the subfolders `mapped_contam` and `rm_contam`, which respectively group (i) the fastqs mapped to the contaminants and (ii) the fastqs with removed contaminants. The latter will be used for downstream processing.
+  * The output folder from this process is split into the subfolders `mapped_contam` and `rm_contam`, which respectively group (i) the fastqs mapped to the contaminants and (ii) the fastqs with removed contaminants. The latter files are used for downstream processing.
 ### Understanding the rm_contam SBATCH
 ```
 python3 rm_contam.py -u --folder_name 7KO-Cyto-BS_processed_fastqs -B
