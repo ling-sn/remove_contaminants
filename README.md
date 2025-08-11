@@ -37,7 +37,7 @@ python3 rm_contam.py -u --folder_name 7KO-Cyto-BS_processed_fastqs -B
 * **--folder_name:** Name of folder containing merged, paired, and unpaired fastqs. DO NOT INPUT A PATH.
 * **-B:** Creates a .bam file for mapped contaminants, which can be used for verification/sanity checks in IGV. The default option is `--no-bamfile`, which is the same as not including this option (_i.e._, if you only specify `--folder_name` and not `-B`).
 ### Additional information about contaminants FASTA
-`contaminants.fa` contains human rRNA, tRNA, snoRNA, and snRNA sequences sourced from the anRNAlab genomic database and various online sources.
+`contaminants.fa` contains human rRNA, tRNA, snoRNA, and snRNA sequences sourced from anRNAlab and various online sources. You can view the individual FASTA files used in `fasta.zip`.
  * rRNA online source: [fallerlab](https://github.com/fallerlab/ARF/blob/main/rRNAs/4V6X_human_rRNAs.fa)
  * tRNA online source: [GtRNAdb](https://gtrnadb.ucsc.edu/genomes/eukaryota/Hsapi38/Hsapi38-seq.html)
  * snoRNA online source: [snoRNABase](https://www-snorna.biotoul.fr/browse.php)
