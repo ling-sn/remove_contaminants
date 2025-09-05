@@ -145,7 +145,7 @@ class Bowtie2Aligner:
             traceback.print_exc()
             raise
 
-def rmcontam_pipeline(folder_name, bamfile):
+def main(folder_name, bamfile):
     ## define input directory
     current_path = Path.cwd()
     input_dir = current_path/folder_name
@@ -196,5 +196,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Starting contaminant removal pipeline...")
-    rmcontam_pipeline(args.folder_name, args.bamfile)
+    main(args.folder_name, args.bamfile)
     print("Pipeline finished.")
