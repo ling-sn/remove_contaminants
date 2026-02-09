@@ -3,7 +3,7 @@
 <img src="https://github.com/user-attachments/assets/dd9b3eac-c863-4a70-85b4-281248d120ad" width="400"/>
 
 * bowtie2 index
-  * **Option 1 (Pre-Built; Recommended):** Skip bowtie2 index creation by using the permanent directory `~/umms-RNAlabDATA/Software/genome_indices/contaminants/bowtie2_contam_index/contaminants_index`. This path is already included in the code by default, so nothing additional needs to be done.
+  * **Option 1 (Pre-Built; Recommended):** Skip bowtie2 index creation by using the permanent directory `~/umms-RNAlabDATA/Software/genome_indices/contaminants/bowtie2_contam_index/SL_contaminants`. This path is already included in the code by default, so nothing additional needs to be done.
   * **Option 2 (Manual):** First, copy `contaminants.fa` to the working directory containing your data folders. Then, copy over `build_index.py` and `build_index.sbatch` and run the SBATCH file. Finally, navigate into `rm_contam.py` and edit this code in the Bowtie2Aligner class to match the directory of your index:
     
     ```
