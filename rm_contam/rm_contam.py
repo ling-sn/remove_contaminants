@@ -5,7 +5,7 @@ import argparse
 
 class Bowtie2Aligner:
     def __init__(self):
-        self.bowtie2_index = Path("~/umms-RNAlabDATA/Software/genome_indices/contaminants/bowtie2_contam_index/contaminants_index").expanduser()
+        self.bowtie2_index = Path("~/umms-RNAlabDATA/Software/genome_indices/contaminants/bowtie2_contam_index/SL_contaminants").expanduser()
         self.r1_filename = None
         self.r2_filename = None
         
@@ -199,3 +199,4 @@ if __name__ == "__main__":
     main(args.folder_name, args.bamfile)
 
     print("Pipeline finished.")
+
